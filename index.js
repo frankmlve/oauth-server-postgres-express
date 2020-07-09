@@ -1,6 +1,7 @@
 //MARK: --- REQUIRE MODULES
-
-const port = 8080
+const dotenv = require('dotenv');
+dotenv.config();
+const port = process.env.SERVER_PORT;
 const mySqlConnection = require('./databaseHelpers/mySqlWrapper')
 const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(mySqlConnection)
 const userDBHelper = require('./databaseHelpers/userDBHelper')(mySqlConnection)
@@ -22,9 +23,6 @@ const authRoutesMethods = require('./authorisation/authRoutesMethods')(userDBHel
 const authRoutes = require('./authorisation/authRoutes')(express.Router(), expressApp, authRoutesMethods)
 const bodyParser = require('body-parser')
 
-//MARK: --- REQUIRE MODULES
-
-//MARK: --- INITIALISE MIDDLEWARE & ROUTES
 //enable CORS
 expressApp.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from

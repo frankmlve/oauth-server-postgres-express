@@ -19,13 +19,8 @@ module.exports = injectedMySqlConnection => {
  * @param callback - takes either an error or null if we successfully saved the accessToken
  */
 function saveAccessToken(accessToken, userID, callback) {
-
   const getUserQuery =  `INSERT INTO access_tokens (access_token, user_id) VALUES ("${accessToken}", ${userID}) ON DUPLICATE KEY UPDATE access_token = "${accessToken}";`
-
-  //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
-
-      //pass in the error which may be null and pass the results object which we get the user from if it is not null
       callback(dataResponseObject.error)
   })
 }

@@ -46,11 +46,8 @@ function getUserFromCrentials(username, password, callback) {
   //create query using the data in the req.body to register the user in the db
   const getUserQuery = `SELECT * FROM user WHERE username = '${username}' AND password = SHA('${password}')`
 
-  console.log('getUserFromCrentials query is: ', getUserQuery);
-
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
-
       //pass in the error which may be null and pass the results object which we get the user from if it is not null
       callback(false, dataResponseObject.results !== null && dataResponseObject.results.length  === 1 ?  dataResponseObject.results[0] : null)
   })
@@ -69,20 +66,10 @@ function getUserFromCrentials(username, password, callback) {
  *                   whether a user exists
  */
 function doesUserExist(username, callback) {
-
-  //create query to check if the user already exists
   const doesUserExistQuery = `SELECT * FROM user WHERE username = '${username}'`
-
-  //holds the results  from the query
   const sqlCallback = (dataResponseObject) => {
-
-      //calculate if user exists or assign null if results is null
       const doesUserExist = dataResponseObject.results !== null ? dataResponseObject.results.length > 0 ? true : false : null
-
-      //check if there are any users with this username and return the appropriate value
       callback(dataResponseObject.error, doesUserExist)
   }
-
-  //execute the query to check if the user exists
   mySqlConnection.query(doesUserExistQuery, sqlCallback)
 }

@@ -51,9 +51,6 @@ function getClient(clientID, clientSecret, callback){
   hence we return false for the error and as there is there are no clientIDs to check we can just return true to indicate
   the client has permission to use the grantType. */
 function grantTypeAllowed(clientID, grantType, callback) {
-
-  console.log('grantTypeAllowed called and clientID is: ', clientID, ' and grantType is: ', grantType);
-
   callback(false, true);
 }
 
@@ -63,19 +60,11 @@ function grantTypeAllowed(clientID, grantType, callback) {
    the user object as you will be the one accessing the data in the user object in the saveAccessToken() method. The library
    doesn't access the user object it just supplies it to the saveAccessToken() method */
 function getUser(username, password, callback){
-
-  console.log('getUser() called and username is: ', username, ' and password is: ', password, ' and callback is: ', callback, ' and is userDBHelper null is: ', userDBHelper);
-
-  //try and get the user using the user's credentials
   userDBHelper.getUserFromCrentials(username, password, callback)
 }
 
 /* saves the accessToken along with the userID retrieved the specified user */
 function saveAccessToken(accessToken, clientID, expires, user, callback){
-
-  console.log('saveAccessToken() called and accessToken is: ', accessToken,
-  ' and clientID is: ',clientID, ' and user is: ', user, ' and accessTokensDBhelper is: ', accessTokensDBHelper)
-
     //save the accessToken along with the user.id
     accessTokensDBHelper.saveAccessToken(accessToken, user.id, callback)
 }
