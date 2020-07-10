@@ -61,21 +61,14 @@ function grantTypeAllowed(clientID, grantType, callback) {
    doesn't access the user object it just supplies it to the saveAccessToken() method */
 function getUser(username, password, callback){
   userDBHelper.getUserFromCrentials(username, password, callback)
-/*   userDBHelper.getUserFromCrentials(username, password, (error, response) => {
-    console.log(response)
-     if (!response.last_update) {
-      //sendResponse()
-    } 
-  }) */
 }
 
 /* saves the accessToken along with the userID retrieved the specified user */
 function saveAccessToken(accessToken, clientID, expires, user, callback){
-    //save the accessToken along with the user.id
     accessTokensDBHelper.saveAccessToken(accessToken, user.id, callback)
 }
 
-/* This method is called when a user is using a bearerToken they've already got as authentication
+/** This method is called when a user is using a bearerToken they've already got as authentication
    i.e. when they're calling APIs. The method effectively serves to validate the bearerToken. A bearerToken
    has been successfully validated if passing it to the getUserIDFromBearerToken() method returns a userID.
    It's able to return a userID because each row in the access_tokens table has a userID in it so we can use

@@ -37,8 +37,9 @@ function registerUser(req, res) {
 
 function login(req, res) {}
 
+//Method reset user password
 function resetPassword(req, res) {
-  userDBHelper.updateUserPassword(req.body.username, (callback) => {
+  userDBHelper.updateUserPassword(req.body.username, req.body.password, (callback) => {
     const message = callback.error === null ? "Password was updated" : "Failed to update password"
     sendResponse(res, message, callback.error);
   });

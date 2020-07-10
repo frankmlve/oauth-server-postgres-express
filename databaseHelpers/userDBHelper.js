@@ -76,8 +76,11 @@ function doesUserExist(username, callback) {
   mySqlConnection.query(doesUserExistQuery, sqlCallback)
 }
 
-function updateUserPassword(userName, sqlCallback) {
+
+//Updating user password last_update
+function updateUserPassword(userName, password, sqlCallback) {
   let current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  const updateDateQuery = `UPDATE user set last_update = '${current_date}' WHERE username = '${userName}';`
-  mySqlConnection.query(updateDateQuery, sqlCallback)
+  const updatePasswordQuery = `UPDATE user set password = SHA('${password}'), last_update = '${current_date}' WHERE username = '${userName}';`
+  mySqlConnection.query(updatePasswordQuery, sqlCallback)
+
 }
