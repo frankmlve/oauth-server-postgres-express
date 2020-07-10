@@ -61,6 +61,12 @@ function grantTypeAllowed(clientID, grantType, callback) {
    doesn't access the user object it just supplies it to the saveAccessToken() method */
 function getUser(username, password, callback){
   userDBHelper.getUserFromCrentials(username, password, callback)
+/*   userDBHelper.getUserFromCrentials(username, password, (error, response) => {
+    console.log(response)
+     if (!response.last_update) {
+      //sendResponse()
+    } 
+  }) */
 }
 
 /* saves the accessToken along with the userID retrieved the specified user */
@@ -94,10 +100,17 @@ function getAccessToken(bearerToken, callback) {
       user: {
         id: userID,
       },
-      expires: new Date(new Date().getTime() + 10000)
+      expires: new Date(new Date().getTime() * 10000)
     }
 
     //set the error to true if userID is null, and pass in the token if there is a userID else pass null
     callback(userID == null ? true : false, userID == null ? null : accessToken)
   })
+}
+//sends a response created out of the specified parameters to the client.
+function sendResponse(res, message, error) {
+  res.status(error !== null ? 400 : 200).json({
+    message: message,
+    error: error,
+  });
 }

@@ -6,10 +6,11 @@ module.exports = injectedMySqlConnection => {
 
   return {
 
-   registerUserInDB: registerUserInDB,
-   getUserFromCrentials: getUserFromCrentials,
-   doesUserExist: doesUserExist
- }
+    registerUserInDB: registerUserInDB,
+    getUserFromCrentials: getUserFromCrentials,
+    doesUserExist: doesUserExist,
+    updateUserPassword: updateUserPassword
+  }
 }
 
 /**
@@ -22,7 +23,8 @@ module.exports = injectedMySqlConnection => {
  * @param registrationCallback - takes a DataResponseObject
  */
 let current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-function registerUserInDB(username, password, registrationCallback){
+
+function registerUserInDB(username, password, registrationCallback) {
 
   //create query using the data in the req.body to register the user in the db
   const registerUserQuery = `INSERT INTO user (username, password, created_date) VALUES ('${username}', SHA('${password}'), '${current_date}')`
@@ -48,8 +50,8 @@ function getUserFromCrentials(username, password, callback) {
 
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
-      //pass in the error which may be null and pass the results object which we get the user from if it is not null
-      callback(false, dataResponseObject.results !== null && dataResponseObject.results.length  === 1 ?  dataResponseObject.results[0] : null)
+    //pass in the error which may be null and pass the results object which we get the user from if it is not null
+    callback(false, dataResponseObject.results !== null && dataResponseObject.results.length === 1 ? dataResponseObject.results[0] : null)
   })
 }
 
@@ -68,8 +70,14 @@ function getUserFromCrentials(username, password, callback) {
 function doesUserExist(username, callback) {
   const doesUserExistQuery = `SELECT * FROM user WHERE username = '${username}'`
   const sqlCallback = (dataResponseObject) => {
-      const doesUserExist = dataResponseObject.results !== null ? dataResponseObject.results.length > 0 ? true : false : null
-      callback(dataResponseObject.error, doesUserExist)
+    const doesUserExist = dataResponseObject.results !== null ? dataResponseObject.results.length > 0 ? true : false : null
+    callback(dataResponseObject.error, doesUserExist)
   }
   mySqlConnection.query(doesUserExistQuery, sqlCallback)
+}
+
+function updateUserPassword(userName, sqlCallback) {
+  let current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const updateDateQuery = `UPDATE user set last_update = '${current_date}' WHERE username = '${userName}';`
+  mySqlConnection.query(updateDateQuery, sqlCallback)
 }
