@@ -2,17 +2,17 @@ module.exports = {
   query: query
 }
 const dotenv = require('dotenv');
-const mySql = require('mysql')
-let connection = null
-
+const POOL = require('pg').Pool;
+const pool;
 dotenv.config();
 
 function initConnection() {
-  connection = mySql.createConnection({
+   pool = new POOL({
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME
+    database: process.env.DATABASE_NAME,
+
   })
 }
 
@@ -25,9 +25,7 @@ function initConnection() {
  */
 function query(queryString, callback) {
   initConnection()
-  connection.connect()
-  connection.query(queryString, function (error, results, fields) {
-    connection.end();
+  pool.query(queryString, function (error, results, fields) {
     callback(setResponse(error, results))
   })
 }
