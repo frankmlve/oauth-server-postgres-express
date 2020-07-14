@@ -28,7 +28,7 @@ function registerUserInDB(username, password, registrationCallback) {
 
   //create query using the data in the req.body to register the user in the db
   const registerUserQuery = `INSERT INTO "user" (username, password, created_date) VALUES ('${username}', SHA('${password}'), '${current_date}')`
-
+console.log(registerUserQuery)
   //execute the query to register the user
   mySqlConnection.query(registerUserQuery, registrationCallback)
 }
