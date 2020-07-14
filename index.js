@@ -45,4 +45,6 @@ expressApp.use('/restrictedArea', restrictedAreaRoutes)
 //MARK: --- INITIALISE MIDDLEWARE & ROUTES
 
 //init the server
-expressApp.listen(process.env.SERVER_PORT || 500)
+expressApp.listen(process.env.PORT || 3000, function(){
+  console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
