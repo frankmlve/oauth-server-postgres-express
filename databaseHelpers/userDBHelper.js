@@ -46,7 +46,7 @@ console.log('Query para insert= '+registerUserQuery)
 function getUserFromCrentials(username, password, callback) {
 
   //create query using the data in the req.body to register the user in the db
-  const getUserQuery = `SELECT * FROM user WHERE username = '${username}' AND password = SHA('${password}')`
+  const getUserQuery = `SELECT * FROM "users" WHERE username = '${username}' AND password = SHA('${password}')`
 
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
@@ -68,7 +68,7 @@ function getUserFromCrentials(username, password, callback) {
  *                   whether a user exists
  */
 function doesUserExist(username, callback) {
-  const doesUserExistQuery = `SELECT * FROM user WHERE username = '${username}'`
+  const doesUserExistQuery = `SELECT * FROM "users" WHERE username = '${username}'`
   const sqlCallback = (dataResponseObject) => {
     const doesUserExist = dataResponseObject.results !== null ? dataResponseObject.results.length > 0 ? true : false : null
     callback(dataResponseObject.error, doesUserExist)
@@ -80,7 +80,7 @@ function doesUserExist(username, callback) {
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
   let current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  const updatePasswordQuery = `UPDATE user set password = SHA('${password}'), last_update = '${current_date}' WHERE username = '${userName}';`
+  const updatePasswordQuery = `UPDATE "users" set password = SHA('${password}'), last_update = '${current_date}' WHERE username = '${userName}';`
   mySqlConnection.query(updatePasswordQuery, sqlCallback)
 
 }
