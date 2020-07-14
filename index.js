@@ -46,5 +46,5 @@ expressApp.use('/restrictedArea', restrictedAreaRoutes)
 
 //init the server
 expressApp.listen(process.env.SERVER_PORT || 8080, function(){
-  console.log("Express server listening on port %d in %s mode", this.address().port, expressApp.settings.env);
+  console.log("Express server is listening on port %d in %s mode", this.address().port, expressApp.settings.env);
 })
