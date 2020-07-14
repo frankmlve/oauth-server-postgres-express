@@ -3,7 +3,7 @@ module.exports = {
 }
 const dotenv = require('dotenv');
 const POOL = require('pg').Pool;
-const pool;
+var pool;
 dotenv.config();
 
 function initConnection() {
