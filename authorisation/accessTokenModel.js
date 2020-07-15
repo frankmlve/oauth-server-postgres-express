@@ -65,10 +65,10 @@ function getUser(username, password, callback) {
     if (result) {
       if (result.last_update === undefined) {
         const message = 'Password most be update';
-        sendResponse(res, message, sqlError)
+        sendResponse(res, message, error)
         return
       }
-      callback(result)
+      callback(error, result)
 
 
     }
