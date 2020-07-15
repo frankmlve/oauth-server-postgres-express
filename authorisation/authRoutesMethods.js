@@ -22,7 +22,7 @@ module.exports = (injectedUserDBHelper) => {
 function registerUser(req, res) {
   userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
     //check if the user exists
-    if (sqlError !== null || doesUserExist) {
+    if (sqlError !== undefined || doesUserExist) {
       const message = sqlError !== null ? "Operation unsuccessful" : userExist_string
       const error = sqlError !== null ? sqlError : userExist_string;
       console.log(sqlError)
