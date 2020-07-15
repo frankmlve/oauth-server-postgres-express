@@ -27,7 +27,7 @@ let current_date = new Date().toISOString().slice(0, 19);
 function registerUserInDB(username, password, registrationCallback) {
 var shaPass = crypto.createHash("sha256").update(password).digest("hex");
   //create query using the data in the req.body to register the user in the db
-  const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', ${current_date})`
+  const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', ${current_date}::timestamp)`
 console.log('Query para insert= '+registerUserQuery)
   //execute the query to register the user
   mySqlConnection.query(registerUserQuery, registrationCallback)
