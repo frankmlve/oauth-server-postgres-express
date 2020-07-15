@@ -48,7 +48,7 @@ function getUserFromCrentials(username, password, callback) {
 
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");
   const getUserQuery = `SELECT * FROM "users" WHERE username = '${username}' AND password = '${shaPass}'`
-
+  console.log(getUserQuery)
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
     //pass in the error which may be null and pass the results object which we get the user from if it is not null
