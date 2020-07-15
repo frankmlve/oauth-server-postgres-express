@@ -22,7 +22,7 @@ var crypto = require("crypto");
  * @param password
  * @param registrationCallback - takes a DataResponseObject
  */
-let current_date = new Date();
+let current_date = new Date().toISOString().slice(0, 19);
 
 function registerUserInDB(username, password, registrationCallback) {
 var shaPass = crypto.createHash("sha256").update(password).digest("hex");
