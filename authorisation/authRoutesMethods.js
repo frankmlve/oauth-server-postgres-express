@@ -23,8 +23,8 @@ function registerUser(req, res) {
   userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
     //check if the user exists
     if (sqlError !== undefined || doesUserExist) {
-      const message = sqlError !== null ? "Operation unsuccessful" : userExist_string
-      const error = sqlError !== null ? sqlError : userExist_string;
+      const message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
+      const error = sqlError !== undefined ? sqlError : userExist_string;
       console.log(sqlError)
       console.log(doesUserExist ? 'User exist= '+ doesUserExist : 'No exist')
       sendResponse(res, message, sqlError)
@@ -33,7 +33,7 @@ function registerUser(req, res) {
     //register the user in the db
     userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
       //create message for the api response
-      const message = dataResponseObject.error === null ? "Registration was successful" : "Failed to register user"
+      const message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
 
       console.log(dataResponseObject.error ? dataResponseObject.error : 'No error')
       sendResponse(res, message, dataResponseObject.error)
@@ -46,7 +46,7 @@ function login(req, res) {}
 //Method reset user password
 function resetPassword(req, res) {
   userDBHelper.updateUserPassword(req.body.username, req.body.password, (callback) => {
-    const message = callback.error === null ? "Password was updated" : "Failed to update password";
+    const message = callback.error === undefined ? "Password was updated" : "Failed to update password";
     sendEmailWithNewToken(req.body.username);
     sendResponse(res, message, callback.error);
   });
@@ -54,7 +54,7 @@ function resetPassword(req, res) {
 
 //sends a response created out of the specified parameters to the client.
 function sendResponse(res, message, error) {
-  res.status(error !== null ? 400 : 200).json({
+  res.status(error !== undefined ? 400 : 200).json({
     message: message,
     error: error,
   });

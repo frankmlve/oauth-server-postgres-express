@@ -1,4 +1,6 @@
 let mySqlConnection;
+var crypto = require("crypto");
+let current_date = new Date().toISOString();
 
 module.exports = injectedMySqlConnection => {
 
@@ -12,7 +14,8 @@ module.exports = injectedMySqlConnection => {
     updateUserPassword: updateUserPassword
   }
 }
-var crypto = require("crypto");
+
+
 /**
  * attempts to register a user in the DB with the specified details.
  * it provides the results in the specified callback which takes a
@@ -22,14 +25,12 @@ var crypto = require("crypto");
  * @param password
  * @param registrationCallback - takes a DataResponseObject
  */
-//let current_date = new Date().toISOString().slice(0, 19);
-let current_date = new Date().toISOString();
+
+
 function registerUserInDB(username, password, registrationCallback) {
-var shaPass = crypto.createHash("sha256").update(password).digest("hex");
-  //create query using the data in the req.body to register the user in the db
+  var shaPass = crypto.createHash("sha256").update(password).digest("hex");
   const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', '${current_date}')`
-console.log('Query para insert= '+registerUserQuery)
-  //execute the query to register the user
+  console.log('Query para insert= ' + registerUserQuery)
   mySqlConnection.query(registerUserQuery, registrationCallback)
 }
 
@@ -45,8 +46,8 @@ console.log('Query para insert= '+registerUserQuery)
  */
 function getUserFromCrentials(username, password, callback) {
 
-  //create query using the data in the req.body to register the user in the db
-  const getUserQuery = `SELECT * FROM "users" WHERE username = '${username}' AND password = SHA('${password}')`
+  var shaPass = crypto.createHash("sha256").update(password).digest("hex");
+  const getUserQuery = `SELECT * FROM "users" WHERE username = '${username}' AND password = '${shaPass}'`
 
   //execute the query to get the user
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
@@ -79,8 +80,9 @@ function doesUserExist(username, callback) {
 
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
-  let current_date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  const updatePasswordQuery = `UPDATE "users" set password = SHA('${password}'), last_update = '${current_date}' WHERE username = '${userName}';`
+  var shaPass = crypto.createHash("sha256").update(password).digest("hex");
+
+  const updatePasswordQuery = `UPDATE "users" set password = ${shaPass}', last_update = '${current_date}' WHERE username = '${userName}';`
   mySqlConnection.query(updatePasswordQuery, sqlCallback)
 
 }
