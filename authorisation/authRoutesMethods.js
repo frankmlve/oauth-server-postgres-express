@@ -1,5 +1,5 @@
 let userDBHelper
-let tokenDBHelper
+let expressApp
 const userExist_string = "User already exists";
 var crypto = require("crypto");
 const nodemailer = require('nodemailer');
@@ -7,9 +7,10 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 dotenv.config();
 
-module.exports = (injectedUserDBHelper) => {
+module.exports = (injectedUserDBHelper, expressApp) => {
 
-  userDBHelper = injectedUserDBHelper
+  userDBHelper = injectedUserDBHelper,
+  expressApp = expressApp
 
   return {
     registerUser: registerUser,
@@ -37,7 +38,11 @@ function registerUser(req, res) {
   })
 }
 
-function login(req, res) {}
+function login(req, res) {
+  userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (sqlError, doesUserExist) => {
+    console.log(doesUserExist)
+  })
+}
 
 //Method reset user password
 function resetPassword(req, res) {
