@@ -63,7 +63,7 @@ function getUser(username, password, callback) {
   userDBHelper.getUserFromCrentials(username, password, (error, result) => {
     console.log(result)
     if (result) {
-      if (result.last_update === undefined) {
+      if (result.last_update === null) {
         const message = 'Password most be update';
         sendResponse(res, message, error)
         return
