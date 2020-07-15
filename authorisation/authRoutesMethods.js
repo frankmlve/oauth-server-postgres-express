@@ -35,6 +35,7 @@ function registerUser(req, res) {
       //create message for the api response
       const message = dataResponseObject.error === null ? "Registration was successful" : "Failed to register user"
 
+      console.log(dataResponseObject.error ? dataResponseObject.error : 'No error')
       sendResponse(res, message, dataResponseObject.error)
     })
   })
