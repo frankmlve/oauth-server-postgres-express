@@ -64,9 +64,7 @@ function getUser(username, password, callback) {
     console.log(result)
     if (result) {
       if (result.last_update === null) {
-        const message = 'Password most be update';
-        sendResponse(res, message, error)
-        return
+        error = true
       }
       callback(error, result)
 
@@ -111,11 +109,4 @@ function getAccessToken(bearerToken, callback) {
     //set the error to true if userID is null, and pass in the token if there is a userID else pass null
     callback(userID == null ? true : false, userID == null ? null : accessToken)
   })
-}
-//sends a response created out of the specified parameters to the client.
-function sendResponse(res, message, error) {
-  res.status(error !== null ? 400 : 200).json({
-    message: message,
-    error: error,
-  });
 }
