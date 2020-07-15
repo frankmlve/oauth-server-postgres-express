@@ -5,9 +5,9 @@ module.exports = injectedMySqlConnection => {
   mySqlConnection = injectedMySqlConnection
 
   return {
-   saveAccessToken: saveAccessToken,
-   getUserIDFromBearerToken: getUserIDFromBearerToken
- }
+    saveAccessToken: saveAccessToken,
+    getUserIDFromBearerToken: getUserIDFromBearerToken
+  }
 }
 
 /**
@@ -19,9 +19,9 @@ module.exports = injectedMySqlConnection => {
  * @param callback - takes either an error or null if we successfully saved the accessToken
  */
 function saveAccessToken(accessToken, userID, callback) {
-  const getUserQuery =  `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID});`
+  const getUserQuery = `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID});`
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
-      callback(dataResponseObject.error)
+    callback(dataResponseObject.error)
   })
 }
 
@@ -32,7 +32,7 @@ function saveAccessToken(accessToken, userID, callback) {
  * @param bearerToken
  * @param callback - takes the user id we if we got the userID or null to represent an error
  */
-function getUserIDFromBearerToken(bearerToken, callback){
+function getUserIDFromBearerToken(bearerToken, callback) {
 
   //create query to get the userID from the row which has the bearerToken
   const getUserIDQuery = `SELECT * FROM "access_tokens" WHERE access_token = '${bearerToken}';`
@@ -40,10 +40,10 @@ function getUserIDFromBearerToken(bearerToken, callback){
   //execute the query to get the userID
   mySqlConnection.query(getUserIDQuery, (dataResponseObject) => {
 
-      //get the userID from the results if its available else assign null
-      const userID = dataResponseObject.results != null && dataResponseObject.results.length == 1 ?
-                                                              dataResponseObject.results[0].user_id : null
+    //get the userID from the results if its available else assign null
+    const userID = dataResponseObject.results != null && dataResponseObject.results.length == 1 ?
+      dataResponseObject.results[0].user_id : null
 
-      callback(userID)
+    callback(userID)
   })
 }
