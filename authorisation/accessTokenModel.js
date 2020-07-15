@@ -1,13 +1,13 @@
 let userDBHelper
 let accessTokensDBHelper
 
-module.exports =  (injectedUserDBHelper, injectedAccessTokensDBHelper) => {
+module.exports = (injectedUserDBHelper, injectedAccessTokensDBHelper) => {
 
   userDBHelper = injectedUserDBHelper
 
   accessTokensDBHelper = injectedAccessTokensDBHelper
 
-  return  {
+  return {
 
     getClient: getClient,
 
@@ -18,7 +18,7 @@ module.exports =  (injectedUserDBHelper, injectedAccessTokensDBHelper) => {
     grantTypeAllowed: grantTypeAllowed,
 
     getAccessToken: getAccessToken
-    }
+  }
 }
 
 /* This method returns the client application which is attempting to get the accessToken.
@@ -33,7 +33,7 @@ As we're not of retrieving the client using the clientID and clientSecret (as we
 we can just create an empty client with all null values.Because the client is a hardcoded object
  - as opposed to a client we've retrieved through another operation - we just pass false for the error parameter
   as no errors can occur due to the aforemtioned hardcoding */
-function getClient(clientID, clientSecret, callback){
+function getClient(clientID, clientSecret, callback) {
 
   const client = {
     clientID,
@@ -59,25 +59,25 @@ function grantTypeAllowed(clientID, grantType, callback) {
    This first parameter is an error of type truthy, and the second is a user object. You can decide the structure of
    the user object as you will be the one accessing the data in the user object in the saveAccessToken() method. The library
    doesn't access the user object it just supplies it to the saveAccessToken() method */
-function getUser(username, password, callback){
+function getUser(username, password, callback) {
   userDBHelper.getUserFromCrentials(username, password, (error, result) => {
     console.log(result)
     if (result) {
-      if (result.last_update === undefined ) {
+      if (result.last_update === undefined) {
         const message = 'Password most be update';
         sendResponse(res, message, sqlError)
         return
-      }else {
-        callback(result)
       }
+      callback(result)
+
 
     }
   })
 }
 
 /* saves the accessToken along with the userID retrieved the specified user */
-function saveAccessToken(accessToken, clientID, expires, user, callback){
-    accessTokensDBHelper.saveAccessToken(accessToken, user.id, callback)
+function saveAccessToken(accessToken, clientID, expires, user, callback) {
+  accessTokensDBHelper.saveAccessToken(accessToken, user.id, callback)
 }
 
 /** This method is called when a user is using a bearerToken they've already got as authentication
