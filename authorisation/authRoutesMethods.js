@@ -46,8 +46,7 @@ function login(req, res) {
         return
       }else {
         res.writeHead(302, {
-          'Location': '/validation'
-          //add other headers here...
+          Location: '/validation'
         });
         res.end();
       }
