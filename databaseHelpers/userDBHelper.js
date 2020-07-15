@@ -54,7 +54,7 @@ function getUserFromCrentials(username, password, callback) {
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
     console.log('Results= ' +dataResponseObject ? dataResponseObject.results : 'No results')
     //pass in the error which may be null and pass the results object which we get the user from if it is not null
-    callback(false, dataResponseObject.results !== undefined && dataResponseObject.results.length === 1 ? dataResponseObject.results[0] : undefined)
+    callback(false, dataResponseObject.results !== undefined && dataResponseObject.results.length === 1 ? dataResponseObject.results.rows[0] : undefined)
   })
 }
 
