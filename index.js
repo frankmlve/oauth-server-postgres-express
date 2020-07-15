@@ -16,7 +16,7 @@ expressApp.oauth = oAuth2Server({
   grants: ['password'],
   debug: true
 })
-module.exports.expressApp = "expressApp";
+module.exports.expressApp = "expressApp.oauth";
 const restrictedAreaRoutesMethods = require('./restrictedArea/restrictedAreaRoutesMethods.js')
 const restrictedAreaRoutes = require('./restrictedArea/restrictedAreaRoutes.js')(express.Router(), expressApp, restrictedAreaRoutesMethods)
 const authRoutesMethods = require('./authorisation/authRoutesMethods')(userDBHelper)
