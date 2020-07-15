@@ -61,6 +61,7 @@ function grantTypeAllowed(clientID, grantType, callback) {
    doesn't access the user object it just supplies it to the saveAccessToken() method */
 function getUser(username, password, callback){
   userDBHelper.getUserFromCrentials(username, password, (error, result) => {
+    console.log(result)
     if (result) {
       if (result.last_update === undefined ) {
         const message = 'Password most be update';
