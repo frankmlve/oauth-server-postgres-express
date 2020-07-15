@@ -23,11 +23,11 @@ var crypto = require("crypto");
  * @param registrationCallback - takes a DataResponseObject
  */
 //let current_date = new Date().toISOString().slice(0, 19);
-let current_date = new Date()
+let current_date = new Date().toISOString();
 function registerUserInDB(username, password, registrationCallback) {
 var shaPass = crypto.createHash("sha256").update(password).digest("hex");
   //create query using the data in the req.body to register the user in the db
-  const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', ${current_date}::timestamp)`
+  const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', ${current_date})`
 console.log('Query para insert= '+registerUserQuery)
   //execute the query to register the user
   mySqlConnection.query(registerUserQuery, registrationCallback)
