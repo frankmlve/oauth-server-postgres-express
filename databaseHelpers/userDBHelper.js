@@ -12,7 +12,7 @@ module.exports = injectedMySqlConnection => {
     updateUserPassword: updateUserPassword
   }
 }
-
+var crypto = require("crypto");
 /**
  * attempts to register a user in the DB with the specified details.
  * it provides the results in the specified callback which takes a
