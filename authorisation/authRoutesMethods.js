@@ -25,7 +25,6 @@ function registerUser(req, res) {
     if (sqlError !== null || doesUserExist) {
       const message = sqlError !== null ? "Operation unsuccessful" : userExist_string
       const error = sqlError !== null ? sqlError : userExist_string;
-       console.log('Error sql= '+sqlError.message)
       sendResponse(res, message, sqlError)
       return
     }
