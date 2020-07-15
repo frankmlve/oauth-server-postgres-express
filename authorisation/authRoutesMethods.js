@@ -45,10 +45,7 @@ function login(req, res) {
         sendResponse(res, message, sqlError)
         return
       }else {
-        res.writeHead(302, {
-          Location: '/validation'
-        });
-        res.end();
+        expressApp
       }
     }
   })
