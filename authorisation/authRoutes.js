@@ -5,6 +5,8 @@ module.exports =  (router, expressApp, authRoutesMethods) => {
 
     //route for allowing existing users to login
     router.post('/login', authRoutesMethods.login)
+    //route for allowing existing users to login
+    router.post('/login/validation', expressApp.oauth.grant())
 
     //router for reset password
     router.post('/reset-pass', authRoutesMethods.resetPassword)

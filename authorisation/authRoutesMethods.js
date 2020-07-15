@@ -1,5 +1,5 @@
 let userDBHelper
-let expressApp = require('../index')
+const expressApp = require('../index')
 const userExist_string = "User already exists";
 var crypto = require("crypto");
 const nodemailer = require('nodemailer');
@@ -45,7 +45,11 @@ function login(req, res) {
         sendResponse(res, message, sqlError)
         return
       }else {
-        expressApp.oauth.grant()
+        response.writeHead(302, {
+          'Location': '/validation'
+          //add other headers here...
+        });
+        response.end();
       }
     }
   })
