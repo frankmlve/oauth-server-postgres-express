@@ -1,5 +1,5 @@
 let userDBHelper
-let expressApp
+let expressApp = require('../index')
 const userExist_string = "User already exists";
 var crypto = require("crypto");
 const nodemailer = require('nodemailer');
@@ -7,10 +7,9 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 dotenv.config();
 
-module.exports = (injectedUserDBHelper, expressApp) => {
+module.exports = (injectedUserDBHelper) => {
 
-  userDBHelper = injectedUserDBHelper,
-  expressApp = expressApp
+  userDBHelper = injectedUserDBHelper
 
   return {
     registerUser: registerUser,
