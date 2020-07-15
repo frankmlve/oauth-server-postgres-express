@@ -37,20 +37,7 @@ function registerUser(req, res) {
   })
 }
 
-function login(req, res) {
-  userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (sqlError, doesUserExist) => {
-    if (doesUserExist) {
-      if (doesUserExist.last_update === undefined ) {
-        const message = 'Password most be update';
-        sendResponse(res, message, sqlError)
-        return
-      }else {
-        console.log('estoy aqui')
-        expressApp
-      }
-    }
-  })
-}
+function login(req, res) {}
 
 //Method reset user password
 function resetPassword(req, res) {
