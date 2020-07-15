@@ -45,11 +45,11 @@ function login(req, res) {
         sendResponse(res, message, sqlError)
         return
       }else {
-        response.writeHead(302, {
+        res.writeHead(302, {
           'Location': '/validation'
           //add other headers here...
         });
-        response.end();
+        res.end();
       }
     }
   })
