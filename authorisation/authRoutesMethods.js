@@ -45,6 +45,7 @@ function login(req, res) {
         sendResponse(res, message, sqlError)
         return
       }else {
+        console.log('estoy aqui')
         expressApp
       }
     }
