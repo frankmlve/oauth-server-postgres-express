@@ -60,10 +60,10 @@ function grantTypeAllowed(clientID, grantType, callback) {
    the user object as you will be the one accessing the data in the user object in the saveAccessToken() method. The library
    doesn't access the user object it just supplies it to the saveAccessToken() method */
 function getUser(username, password, callback){
-  userDBHelper.getUserFromCrentials(username, password, (error, result) => {
-    console.log(result)
-    if (result) {
-      if (result.last_update === undefined ) {
+  userDBHelper.getUserFromCrentials(username, password, (callback) => {
+    console.log(callback)
+    if (callback.results) {
+      if (callback.results.last_update === undefined ) {
         const message = 'Password most be update';
         sendResponse(res, message, sqlError)
         return
