@@ -25,8 +25,6 @@ function registerUser(req, res) {
     if (sqlError !== undefined || doesUserExist) {
       const message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
       const error = sqlError !== undefined ? sqlError : userExist_string;
-      console.log(sqlError)
-      console.log(doesUserExist ? 'User exist= '+ doesUserExist : 'No exist')
       sendResponse(res, message, sqlError)
       return
     }
@@ -34,8 +32,6 @@ function registerUser(req, res) {
     userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
       //create message for the api response
       const message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
-
-      console.log(dataResponseObject.error ? dataResponseObject.error : 'No error')
       sendResponse(res, message, dataResponseObject.error)
     })
   })
