@@ -71,6 +71,7 @@ function getUserFromCrentials(username, password, callback) {
  */
 function doesUserExist(username, callback) {
   const doesUserExistQuery = `SELECT * FROM "users" WHERE username = '${username}'`
+  console.log(doesUserExistQuery)
   const sqlCallback = (dataResponseObject) => {
 
     const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.length > 0 ? true : false : null
