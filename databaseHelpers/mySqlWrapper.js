@@ -14,11 +14,11 @@ function query(queryString, cbFunc) {
     database: process.env.DATABASE_NAME || 'oauthdatabase',
     password: process.env.DATABASE_PASSWORD || 'test123', */
     //ssl: true 
-    user: 'admin',
+    /* user: 'admin',
     host:  'localhost',
     database: 'oauthserver',
-    password: 'admin',
-    //connectionString: connectionString,
+    password: 'admin', */
+    connectionString: connectionString,
   });
 
   pool.query(queryString, (error, results) => {
