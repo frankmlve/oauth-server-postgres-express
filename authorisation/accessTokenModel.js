@@ -87,13 +87,13 @@ function getAccessToken(bearerToken, callback) {
 
   //try and get the userID from the db using the bearerToken
   accessTokensDBHelper.getUserIDFromBearerToken(bearerToken, (userID) => {
-
+    let time = new Date().setHours(new Date().getHours() +1)
     //create the token using the retrieved userID
     const accessToken = {
       user: {
         id: userID,
       },
-      expires: new Date(new Date().getTime() * 10000)
+      expires: new Date(time)
     }
 
     //set the error to true if userID is null, and pass in the token if there is a userID else pass null
