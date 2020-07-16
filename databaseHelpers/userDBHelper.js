@@ -11,7 +11,8 @@ module.exports = injectedMySqlConnection => {
     registerUserInDB: registerUserInDB,
     getUserFromCrentials: getUserFromCrentials,
     doesUserExist: doesUserExist,
-    updateUserPassword: updateUserPassword
+    updateUserPassword: updateUserPassword,
+    getUserForResetPass: getUserForResetPass
   }
 }
 
@@ -80,7 +81,14 @@ function doesUserExist(username, callback) {
   mySqlConnection.query(doesUserExistQuery, sqlCallback)
 }
 
-
+function getUserForResetPass(userName, callback) {
+  const getUserQuery = `SELECT * FROM "users" WHERE username = '${userName}'`
+  const sqlCallback = (dataResponseObject) => {
+    const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows[0] : null
+    callback(dataResponseObject.error, userExist)
+  }
+  mySqlConnection.query(getUserQuery, sqlCallback)
+}
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");

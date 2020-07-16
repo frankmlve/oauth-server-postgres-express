@@ -6,7 +6,6 @@ const nodemailer = require('nodemailer');
 
 const jwt = require('jwt-simple');
 const dotenv = require('dotenv');
-const { measureMemory } = require("vm");
 dotenv.config();
 
 module.exports = (injectedUserDBHelper) => {
@@ -17,7 +16,8 @@ module.exports = (injectedUserDBHelper) => {
     registerUser: registerUser,
     login: login,
     resetPassword: resetPassword,
-    sendEmailWithNewToken: sendEmailWithNewToken
+    sendEmailWithNewToken: sendEmailWithNewToken,
+    updatePassword: updatePassword
   }
 }
 
@@ -43,17 +43,30 @@ function login(req, res) {}
 
 //Method reset user password
 function resetPassword(req, res) {
-  userDBHelper.doesUserExist(req.body.username, (error, result) => {
+  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
     let message = '';
     if (result) {
-      sendEmailWithNewToken(req.body.username, res);
+      var payload = {
+        email: req.body.username
+      }
+      var secret = result.password + '-' + result.created_date.getTime()
+      var token = jwt.encode(payload, secret)
+      sendEmailWithNewToken(req.body.username, token);
       message = 'We send you an email with the link to reset your password'
+    }else {
+      message = 'User not registered';
+      error = 'Please insert a valid user';
     }
 
     sendResponse(res, message, error)
   });
 }
 
+function updatePassword(res, req) {
+  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
+    console.log(result);
+  })
+}
 //sends a response created out of the specified parameters to the client.
 function sendResponse(res, message, error) {
   res.status(error !== undefined ? 400 : 200).json({
@@ -62,7 +75,7 @@ function sendResponse(res, message, error) {
   });
 }
 
-function sendEmailWithNewToken(username, res) {
+function sendEmailWithNewToken(username, token) {
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -76,7 +89,7 @@ function sendEmailWithNewToken(username, res) {
     from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: 'Please go to this link to reset your password '+ process.env.APP_URL + '/auth/newPassword'
+    html: 'Please go to this link to reset your password '+ process.env.APP_URL + '/' + token
   };
 
   transporter.sendMail(mailOptions, function (error, info) {

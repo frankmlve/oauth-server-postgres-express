@@ -9,5 +9,7 @@ module.exports =  (router, expressApp, authRoutesMethods) => {
     //router for reset password
     router.post('/reset-pass', authRoutesMethods.resetPassword)
 
+    router.post('/newPassword/:token', authRoutesMethods.updatePassword)
+
     return router
 }
