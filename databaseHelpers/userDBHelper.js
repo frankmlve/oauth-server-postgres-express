@@ -74,7 +74,7 @@ function doesUserExist(username, callback) {
   console.log(doesUserExistQuery)
   const sqlCallback = (dataResponseObject) => {
 
-    const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.length > 0 ? true : false : null
+    const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rowCount > 0 ? true : false : null
     callback(dataResponseObject.error, doesUserExist)
   }
   mySqlConnection.query(doesUserExistQuery, sqlCallback)

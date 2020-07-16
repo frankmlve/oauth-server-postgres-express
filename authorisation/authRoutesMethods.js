@@ -1,10 +1,12 @@
 let userDBHelper
-const expressApp = require('../index')
 const userExist_string = "User already exists";
 var crypto = require("crypto");
+
 const nodemailer = require('nodemailer');
 
+const jwt = require('jwt-simple');
 const dotenv = require('dotenv');
+const { measureMemory } = require("vm");
 dotenv.config();
 
 module.exports = (injectedUserDBHelper) => {
@@ -41,10 +43,14 @@ function login(req, res) {}
 
 //Method reset user password
 function resetPassword(req, res) {
-  userDBHelper.updateUserPassword(req.body.username, req.body.password, (callback) => {
-    const message = callback.error === undefined ? "Password was updated" : "Failed to update password";
-    sendEmailWithNewToken(req.body.username);
-    sendResponse(res, message, callback.error);
+  userDBHelper.doesUserExist(req.body.username, (error, result) => {
+    let message = '';
+    if (result) {
+      sendEmailWithNewToken(req.body.username, res);
+      message = 'We send you an email with the link to reset your password'
+    }
+
+    sendResponse(res, message, error)
   });
 }
 
@@ -56,19 +62,21 @@ function sendResponse(res, message, error) {
   });
 }
 
-function sendEmailWithNewToken(username) {
+function sendEmailWithNewToken(username, res) {
   var transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
     auth: {
-      user: process.env.EMAIL_APP,
+      user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
     }
   });
+
   var mailOptions = {
-    from: process.env.EMAIL_APP,
+    from: process.env.EMAIL_USER,
     to: username,
-    subject: 'Sending Email using Node.js',
-    text: 'That was easy!'
+    subject: 'Reset Password',
+    html: 'Please go to this link to reset your password '+ process.env.APP_URL + '/auth/newPassword'
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
