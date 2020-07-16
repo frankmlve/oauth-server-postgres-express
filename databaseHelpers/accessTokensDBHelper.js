@@ -19,7 +19,7 @@ module.exports = injectedMySqlConnection => {
  * @param callback - takes either an error or null if we successfully saved the accessToken
  */
 function saveAccessToken(accessToken, userID, callback) {
-  const getUserQuery = `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID});`
+  const getUserQuery = `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID}) ON CONFLICT (user_id) DO UPDATE SET access_token = '${accessToken}';`
   mySqlConnection.query(getUserQuery, (dataResponseObject) => {
     callback(dataResponseObject.error)
   })
@@ -36,13 +36,13 @@ function getUserIDFromBearerToken(bearerToken, callback) {
 
   //create query to get the userID from the row which has the bearerToken
   const getUserIDQuery = `SELECT * FROM "access_tokens" WHERE access_token = '${bearerToken}';`
-
+  console.log(getUserIDQuery)
   //execute the query to get the userID
   mySqlConnection.query(getUserIDQuery, (dataResponseObject) => {
 
     //get the userID from the results if its available else assign null
-    const userID = dataResponseObject.results != null && dataResponseObject.results.length == 1 ?
-      dataResponseObject.results[0].user_id : null
+    const userID = dataResponseObject.results != undefined && dataResponseObject.results.rowCount == 1 ?
+      dataResponseObject.results.rows[0].user_id : null
 
     callback(userID)
   })
