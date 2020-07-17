@@ -52,7 +52,7 @@ function login(req, res) {}
 
 //Method reset user password
 function resetPassword(req, res) {
-  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
+  userDBHelper.getUserForResetPass(null, req.body.username, (error, result) => {
     let message = '';
     if (result) {
       var payload = {
@@ -60,7 +60,8 @@ function resetPassword(req, res) {
       }
       var secret = result[0].password + '-' + result[0].created_date.getTime()
       var token = jwt.encode(payload, secret)
-      sendEmailWithNewToken(req.body.username, req.body.app_url, token, res);
+      console.log(token + '- id= ' + result[0].id)
+      sendEmailWithNewToken(req.body.username, result[0].id, req.body.app_url, token, res);
     } else {
       message = 'User not registered';
       error = 'Please insert a valid user';
@@ -73,9 +74,18 @@ var newPass;
 
 function updatePassword(req, res) {
   newPass = crypto.createHash("sha256").update(req.body.password).digest("hex");
-  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
+
+  userDBHelper.getUserForResetPass(req.query.id, null, (error, result) => {
     let message = '';
     let pass = [];
+    var secret = result[0].password + '-' + result[0].created_date.getTime()
+    var payload = jwt.decode(req.body.token, secret);
+    if (payload.email != result[0].username) {
+      message = `User is not valid`;
+      error = true;
+      sendResponse(res, message, error);
+      return
+    }
     //Getting all old's passwords used for the user
     for (let element of result) {
       pass.push(element.password);
@@ -89,9 +99,8 @@ function updatePassword(req, res) {
     } else {
       userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
         userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
-          message = callback.error != undefined ? callback.error : 'Password was update successfully';
+          message = callback.error != undefined ? callback.error : 'Password was successfully updated';
           sendResponse(res, message, callback.error)
-          //return
         });
       });
     }
@@ -105,7 +114,7 @@ function sendResponse(res, message, error) {
   });
 }
 
-function sendEmailWithNewToken(username, app_url, token, res) {
+function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -123,9 +132,8 @@ function sendEmailWithNewToken(username, app_url, token, res) {
     from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: '<p>Please go to this link to <a href="' + app_url + '/' + token + '"> reset your password</a></p>'
+    html: '<p>Please go to this link to <a href="' + app_url + '/' + token + '?id=' + user_id + '"> reset your password</a></p>'
   };
-
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
