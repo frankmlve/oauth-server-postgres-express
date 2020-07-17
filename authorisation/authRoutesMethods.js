@@ -58,7 +58,7 @@ function resetPassword(req, res) {
       var payload = {
         email: req.body.username
       }
-      var secret = result.password + '-' + result.created_date.getTime()
+      var secret = result[0].password + '-' + result[0].created_date.getTime()
       var token = jwt.encode(payload, secret)
       sendEmailWithNewToken(req.body.username, req.body.app_url, token, res);
     } else {
@@ -76,7 +76,7 @@ function updatePassword(req, res) {
   userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
     let message = '';
     let pass = [];
-
+    //Getting all old's passwords used for the user
     for (let element of result) {
       pass.push(element.password);
       if (element.old_password) pass.push(element.old_password);
@@ -94,7 +94,6 @@ function updatePassword(req, res) {
           //return
         });
       });
-
     }
   })
 }
