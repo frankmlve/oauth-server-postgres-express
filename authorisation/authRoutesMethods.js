@@ -51,7 +51,7 @@ function resetPassword(req, res) {
       }
       var secret = result.password + '-' + result.created_date.getTime()
       var token = jwt.encode(payload, secret)
-      sendEmailWithNewToken(req.body.username, token);
+      sendEmailWithNewToken(req.body.username, req.body.app_url, token);
       message = 'We send you an email with the link to reset your password'
     }else {
       message = 'User not registered';
@@ -62,8 +62,9 @@ function resetPassword(req, res) {
   });
 }
 
-function updatePassword(res, req) {
-  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
+function updatePassword(req, res) {
+  
+    userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
     console.log(result);
   })
 }
@@ -75,7 +76,7 @@ function sendResponse(res, message, error) {
   });
 }
 
-function sendEmailWithNewToken(username, token) {
+function sendEmailWithNewToken(username, app_url, token) {
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
@@ -89,7 +90,7 @@ function sendEmailWithNewToken(username, token) {
     from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: 'Please go to this link to reset your password '+ process.env.APP_URL + '/' + token
+    html: '<p>Please go to this link to <a href="'+ app_url + '/' + token +'"> reset your password</a></p>'
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
