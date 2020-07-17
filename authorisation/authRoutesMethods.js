@@ -61,11 +61,19 @@ function resetPassword(req, res) {
     sendResponse(res, message, error)
   });
 }
+var newPass;
 
 function updatePassword(req, res) {
-
+  newPass = crypto.createHash("sha256").update(req.body.password).digest("hex");
   userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
-    console.log(result);
+    if (result && (newPass != result.password)) {
+      userDBHelper.updateUserPassword(result.username, newPass, callback => {
+        const message = callback.error != undefined ? callback.error : 'Password was update successfully';
+        sendResponse(res, message, callback.error)
+      })
+    } else {
+      const message = 'New password have to be different from the actual'
+    }
   })
 }
 //sends a response created out of the specified parameters to the client.
@@ -81,7 +89,6 @@ function sendEmailWithNewToken(username, app_url, token) {
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD

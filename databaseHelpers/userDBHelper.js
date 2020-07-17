@@ -91,9 +91,7 @@ function getUserForResetPass(userName, callback) {
 }
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
-  var shaPass = crypto.createHash("sha256").update(password).digest("hex");
-
-  const updatePasswordQuery = `UPDATE "users" set password = ${shaPass}', last_update = '${current_date}' WHERE username = '${userName}';`
+  const updatePasswordQuery = `UPDATE "users" set password = '${password}', last_update = '${current_date}' WHERE username = '${userName}';`
   mySqlConnection.query(updatePasswordQuery, sqlCallback)
 
 }
