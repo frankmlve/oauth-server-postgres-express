@@ -53,7 +53,7 @@ function resetPassword(req, res) {
       var token = jwt.encode(payload, secret)
       sendEmailWithNewToken(req.body.username, req.body.app_url, token);
       message = 'We send you an email with the link to reset your password'
-    }else {
+    } else {
       message = 'User not registered';
       error = 'Please insert a valid user';
     }
@@ -63,8 +63,8 @@ function resetPassword(req, res) {
 }
 
 function updatePassword(req, res) {
-  
-    userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
+
+  userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
     console.log(result);
   })
 }
@@ -81,7 +81,10 @@ function sendEmailWithNewToken(username, app_url, token) {
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
     secure: process.env.EMAIL_TLS,
-    ssl: false,
+
+    tls: {
+      rejectUnauthorized: false
+    },
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
@@ -92,7 +95,7 @@ function sendEmailWithNewToken(username, app_url, token) {
     from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: '<p>Please go to this link to <a href="'+ app_url + '/' + token +'"> reset your password</a></p>'
+    html: '<p>Please go to this link to <a href="' + app_url + '/' + token + '"> reset your password</a></p>'
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
