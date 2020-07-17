@@ -2,6 +2,7 @@ let mySqlConnection;
 var crypto = require("crypto");
 let current_date = new Date().toISOString();
 
+
 module.exports = injectedMySqlConnection => {
 
   mySqlConnection = injectedMySqlConnection
@@ -83,7 +84,7 @@ function doesUserExist(username, callback) {
 }
 
 function getUserForResetPass(userName, callback) {
-  const getUserQuery = `SELECT * FROM "users" u JOIN "old_passwords" op ON u.id = op.user_id WHERE username = '${userName}'`
+  const getUserQuery = `SELECT * FROM "users" u WHERE u.username = '${userName}'`
   const sqlCallback = (dataResponseObject) => {
     const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows : null
     callback(dataResponseObject.error, userExist)
@@ -92,12 +93,15 @@ function getUserForResetPass(userName, callback) {
 }
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
-  const updatePasswordQuery = `UPDATE "users" set password = '${password}', last_update = '${current_date}' WHERE username = '${userName}';`
+  let date = new Date().setMonth(new Date().getMonth() + parseInt(process.env.PASSWORD_EXPIRE_DATE))
+  let expiration_date = new Date(date).toISOString()
+  const updatePasswordQuery = `UPDATE "users" set password = '${password}', last_update = '${current_date}', expiration_date= '${expiration_date}' WHERE username = '${userName}';`
   mySqlConnection.query(updatePasswordQuery, sqlCallback)
 
 }
 
-function updateUserOldPassword(old_password, username, sqlCallback) {
-  const updateOldPasswordQuery = `INSERT INTO "old_passwords"  (username, old_password) VALUES (${username}, '${old_password}');`;
+function updateUserOldPassword(username, old_password, sqlCallback) {
+  //var shaPass = crypto.createHash("sha256").update(old_password).digest("hex");
+  const updateOldPasswordQuery = `INSERT INTO "old_passwords"  (username, old_password) VALUES ('${username}', '${old_password}');`;
   mySqlConnection.query(updateOldPasswordQuery, sqlCallback);
 }

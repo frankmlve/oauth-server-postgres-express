@@ -23,22 +23,28 @@ module.exports = (injectedUserDBHelper) => {
 
 function registerUser(req, res) {
   userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
+    let message;
+    let error;
     //check if the user exists
     if (sqlError !== undefined || doesUserExist) {
-      const message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
-      const error = sqlError !== undefined ? sqlError : userExist_string;
+      message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
+      error = sqlError !== undefined ? sqlError : userExist_string;
       sendResponse(res, message, sqlError)
       return
     }
-    //register the user in the db
-    userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
-      //create message for the api response
-      userDBHelper.updateUserOldPassword(req.body.username, req.body.password, callback => {
-        const message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
+    if (req.body.password == null || req.body.password == '') {
+      message = 'Please insert a password';
+      sendResponse(res, message, sqlError)
+      return
+    } else {
+      //register the user in the db
+      userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
+        //create message for the api response
+        message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
         sendResponse(res, message, dataResponseObject.error)
       })
+    }
 
-    })
   })
 }
 
@@ -55,15 +61,12 @@ function resetPassword(req, res) {
       var secret = result.password + '-' + result.created_date.getTime()
       var token = jwt.encode(payload, secret)
       sendEmailWithNewToken(req.body.username, req.body.app_url, token, res);
-
     } else {
       message = 'User not registered';
       error = 'Please insert a valid user';
       sendResponse(res, message, error)
       return
     }
-
-
   });
 }
 var newPass;
@@ -76,7 +79,7 @@ function updatePassword(req, res) {
 
     for (let element of result) {
       pass.push(element.password);
-      pass.push(element.old_password);
+      if (element.old_password) pass.push(element.old_password);
     }
     var flag = pass.some(val => newPass.indexOf(val) !== -1);
     if (flag) {
@@ -84,7 +87,7 @@ function updatePassword(req, res) {
       sendResponse(res, message, error);
       return
     } else {
-      userDBHelper.updateUserOldPassword(result[0].password, result[0].username, callback => {
+      userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
         userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
           message = callback.error != undefined ? callback.error : 'Password was update successfully';
           sendResponse(res, message, callback.error)
