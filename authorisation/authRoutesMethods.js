@@ -33,8 +33,11 @@ function registerUser(req, res) {
     //register the user in the db
     userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
       //create message for the api response
-      const message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
-      sendResponse(res, message, dataResponseObject.error)
+      userDBHelper.updateUserOldPassword(req.body.username, req.body.password, callback => {
+        const message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
+        sendResponse(res, message, dataResponseObject.error)
+      })
+
     })
   })
 }
@@ -51,14 +54,16 @@ function resetPassword(req, res) {
       }
       var secret = result.password + '-' + result.created_date.getTime()
       var token = jwt.encode(payload, secret)
-      sendEmailWithNewToken(req.body.username, req.body.app_url, token);
-      message = 'We send you an email with the link to reset your password'
+      sendEmailWithNewToken(req.body.username, req.body.app_url, token, res);
+
     } else {
       message = 'User not registered';
       error = 'Please insert a valid user';
+      sendResponse(res, message, error)
+      return
     }
 
-    sendResponse(res, message, error)
+
   });
 }
 var newPass;
@@ -66,13 +71,27 @@ var newPass;
 function updatePassword(req, res) {
   newPass = crypto.createHash("sha256").update(req.body.password).digest("hex");
   userDBHelper.getUserForResetPass(req.body.username, (error, result) => {
-    if (result && (newPass != result.password)) {
-      userDBHelper.updateUserPassword(result.username, newPass, callback => {
-        const message = callback.error != undefined ? callback.error : 'Password was update successfully';
-        sendResponse(res, message, callback.error)
-      })
+    let message = '';
+    let pass = [];
+
+    for (let element of result) {
+      pass.push(element.password);
+      pass.push(element.old_password);
+    }
+    var flag = pass.some(val => newPass.indexOf(val) !== -1);
+    if (flag) {
+      message = `Can't use this password, please choose one you have not used before`
+      sendResponse(res, message, error);
+      return
     } else {
-      const message = 'New password have to be different from the actual'
+      userDBHelper.updateUserOldPassword(result[0].password, result[0].username, callback => {
+        userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
+          message = callback.error != undefined ? callback.error : 'Password was update successfully';
+          sendResponse(res, message, callback.error)
+          //return
+        });
+      });
+
     }
   })
 }
@@ -84,7 +103,7 @@ function sendResponse(res, message, error) {
   });
 }
 
-function sendEmailWithNewToken(username, app_url, token) {
+function sendEmailWithNewToken(username, app_url, token, res) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -108,8 +127,14 @@ function sendEmailWithNewToken(username, app_url, token) {
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
+      const message = 'The email could not be sent'
+      sendResponse(res, message, error)
+      return
     } else {
       console.log('Email sent: ' + info.response);
+      const message = 'We send you an email with the link to reset your password'
+      sendResponse(res, message, error)
+      return
     }
   });
 }

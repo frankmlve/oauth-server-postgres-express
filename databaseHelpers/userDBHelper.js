@@ -12,7 +12,8 @@ module.exports = injectedMySqlConnection => {
     getUserFromCrentials: getUserFromCrentials,
     doesUserExist: doesUserExist,
     updateUserPassword: updateUserPassword,
-    getUserForResetPass: getUserForResetPass
+    getUserForResetPass: getUserForResetPass,
+    updateUserOldPassword: updateUserOldPassword 
   }
 }
 
@@ -82,9 +83,9 @@ function doesUserExist(username, callback) {
 }
 
 function getUserForResetPass(userName, callback) {
-  const getUserQuery = `SELECT * FROM "users" WHERE username = '${userName}'`
+  const getUserQuery = `SELECT * FROM "users" u JOIN "old_passwords" op ON u.id = op.user_id WHERE username = '${userName}'`
   const sqlCallback = (dataResponseObject) => {
-    const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows[0] : null
+    const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows : null
     callback(dataResponseObject.error, userExist)
   }
   mySqlConnection.query(getUserQuery, sqlCallback)
@@ -94,4 +95,9 @@ function updateUserPassword(userName, password, sqlCallback) {
   const updatePasswordQuery = `UPDATE "users" set password = '${password}', last_update = '${current_date}' WHERE username = '${userName}';`
   mySqlConnection.query(updatePasswordQuery, sqlCallback)
 
+}
+
+function updateUserOldPassword(old_password, username, sqlCallback) {
+  const updateOldPasswordQuery = `INSERT INTO "old_passwords"  (username, old_password) VALUES (${username}, '${old_password}');`;
+  mySqlConnection.query(updateOldPasswordQuery, sqlCallback);
 }
