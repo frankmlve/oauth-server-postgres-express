@@ -115,14 +115,9 @@ function sendResponse(res, message, error) {
 }
 
 function sendEmailWithNewToken(username, user_id, app_url, token, res) {
-  //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT),
-/*     secure: false,
-    tls: {
-      rejectUnauthorized: true
-    }, */
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
@@ -145,6 +140,7 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
     } else {
       console.log('Email sent: ' + info.response);
       const message = 'We send you an email with the link to reset your password'
+      error = undefined
       sendResponse(res, message, error)
       return
     }
