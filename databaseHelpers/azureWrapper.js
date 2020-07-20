@@ -1,6 +1,6 @@
 const CosmosClient = require("@azure/cosmos").CosmosClient;
-const config = require("./config");
-const dbContext = require("./data/databaseContext");
+const config = require("../config");
+const dbContext = require("../data/databaseContext");
 
 const { endpoint, key, databaseId, containerId } = config;
 
@@ -12,4 +12,7 @@ module.exports = {
   container: container
 }
 // Make sure Tasks database is already setup. If not, create it.
-await dbContext.create(client, databaseId, containerId);
+
+async function connection(client, databaseId, containerId) {
+  await dbContext.create(client, databaseId, containerId);
+}

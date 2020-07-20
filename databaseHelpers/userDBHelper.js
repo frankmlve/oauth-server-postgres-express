@@ -30,12 +30,26 @@ module.exports = injectedAzureConnection => {
  */
 
 
-function registerUserInDB(username, password, registrationCallback) {
+async function registerUserInDB(username, password, registrationCallback) {
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");
 
-  const newUser = {};
-  console.log('Query para insert= ' + registerUserQuery)
-  azureConnection.query(registerUserQuery, registrationCallback)
+  let id= await azureConnection.container.items.query(`select max(c.id) from c c`).fetchAll();
+  let mas_id = id.resources[0]  
+  const newUser = {
+    id: max_id + 1,
+    category: 'users',
+    username: username,
+    password: shaPass,
+    create_date: current_date,
+    last_update: null,
+  };
+  try {
+    const { resource: createdItem } = await azureConnection.container.items.create(newUser);
+  }catch (e){
+    console.log(e)
+  }
+ 
+
 }
 
 /**
@@ -73,21 +87,20 @@ function getUserFromCrentials(username, password, callback) {
  * @param callback - takes an error and a boolean value indicating
  *                   whether a user exists
  */
-function doesUserExist(username, callback) {
+async function doesUserExist(username, callback) {
   const doesUserExistQuery = `SELECT * FROM c c WHERE c.user = "${username}"`
   console.log(doesUserExistQuery)
-  /*   const sqlCallback = (dataResponseObject) => {
-
-      const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rowCount > 0 ? true : false : null
-      callback(dataResponseObject.error, doesUserExist)
-    } */
   const {
     resources: items
-  } = await container.items
-    .query(querySpec)
+  } = await azureConnection.container.items
+    .query(doesUserExistQuery)
     .fetchAll();
 
-    console.log(items)
+    if ( items.length == 0) {
+      callback(undefined, false)
+    }else {
+      callback(true, true)
+    }
 }
 
 function getUserForResetPass(user_id, username, callback) {
