@@ -128,7 +128,7 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
     from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: '<p>Please go to this link to <a href="' + app_url + '/' + token + '?id=' + user_id + '"> reset your password</a></p>'
+    html: '<p>Please go to this link to <a href="' + app_url + '?token=' + token + '&id=' + user_id + '"> reset your password</a></p>'
   };
   console.log(mailOptions.html)
   transporter.sendMail(mailOptions, function (error, info) {
