@@ -115,17 +115,15 @@ function sendResponse(res, message, error) {
 }
 
 function sendEmailWithNewToken(username, user_id, app_url, token, res) {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
-    secure: false,
+    secure: process.env.EMAIL_TLS,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
-    },
-    debug: true,
-    logger: true
+    }
   });
 
   var mailOptions = {
