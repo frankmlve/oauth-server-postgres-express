@@ -1,8 +1,8 @@
-let mySqlConnection
+let azureConnection
 
-module.exports = injectedMySqlConnection => {
+module.exports = injectedazureConnection => {
 
-  mySqlConnection = injectedMySqlConnection
+  azureConnection = injectedazureConnection
 
   return {
     saveAccessToken: saveAccessToken,
@@ -20,7 +20,7 @@ module.exports = injectedMySqlConnection => {
  */
 function saveAccessToken(accessToken, userID, callback) {
   const getUserQuery = `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID}) ON CONFLICT (user_id) DO UPDATE SET access_token = '${accessToken}';`
-  mySqlConnection.query(getUserQuery, (dataResponseObject) => {
+  azureConnection.query(getUserQuery, (dataResponseObject) => {
     callback(dataResponseObject.error)
   })
 }
@@ -38,7 +38,7 @@ function getUserIDFromBearerToken(bearerToken, callback) {
   const getUserIDQuery = `SELECT * FROM "access_tokens" WHERE access_token = '${bearerToken}';`
   console.log(getUserIDQuery)
   //execute the query to get the userID
-  mySqlConnection.query(getUserIDQuery, (dataResponseObject) => {
+  azureConnection.query(getUserIDQuery, (dataResponseObject) => {
 
     //get the userID from the results if its available else assign null
     const userID = dataResponseObject.results != undefined && dataResponseObject.results.rowCount == 1 ?

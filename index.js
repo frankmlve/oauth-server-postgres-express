@@ -2,13 +2,15 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.SERVER_PORT;
-const mySqlConnection = require('./databaseHelpers/mySqlWrapper')
-const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(mySqlConnection)
-const userDBHelper = require('./databaseHelpers/userDBHelper')(mySqlConnection)
+const azureConnection = require('./databaseHelpers/azureWrapper')
+const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(azureConnection)
+const userDBHelper = require('./databaseHelpers/userDBHelper')(azureConnection)
 const oAuthModel = require('./authorisation/accessTokenModel')(userDBHelper, accessTokenDBHelper)
 
 const express = require('express')
 const expressApp = express()
+
+
 
 const oAuth2Server = require('node-oauth2-server')
 expressApp.oauth = oAuth2Server({
@@ -16,7 +18,6 @@ expressApp.oauth = oAuth2Server({
   grants: ['password'],
   debug: true
 })
-module.exports.expressApp = expressApp.oauth.grant()
 const restrictedAreaRoutesMethods = require('./restrictedArea/restrictedAreaRoutesMethods.js')
 const restrictedAreaRoutes = require('./restrictedArea/restrictedAreaRoutes.js')(express.Router(), expressApp, restrictedAreaRoutesMethods)
 const authRoutesMethods = require('./authorisation/authRoutesMethods')(userDBHelper)
