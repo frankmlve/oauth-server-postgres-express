@@ -14,7 +14,7 @@ module.exports = injectedAzureConnection => {
     doesUserExist: doesUserExist,
     updateUserPassword: updateUserPassword,
     getUserForResetPass: getUserForResetPass,
-    updateUserOldPassword: updateUserOldPassword 
+    updateUserOldPassword: updateUserOldPassword
   }
 }
 
@@ -32,7 +32,7 @@ module.exports = injectedAzureConnection => {
 
 function registerUserInDB(username, password, registrationCallback) {
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");
-  
+
   const newUser = {};
   console.log('Query para insert= ' + registerUserQuery)
   azureConnection.query(registerUserQuery, registrationCallback)
@@ -74,18 +74,24 @@ function getUserFromCrentials(username, password, callback) {
  *                   whether a user exists
  */
 function doesUserExist(username, callback) {
-  const doesUserExistQuery = `SELECT * FROM "users" WHERE username = '${username}'`
+  const doesUserExistQuery = `SELECT * FROM c c WHERE c.user = "${username}"`
   console.log(doesUserExistQuery)
-  const sqlCallback = (dataResponseObject) => {
+  /*   const sqlCallback = (dataResponseObject) => {
 
-    const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rowCount > 0 ? true : false : null
-    callback(dataResponseObject.error, doesUserExist)
-  }
-  azureConnection.query(doesUserExistQuery, sqlCallback)
+      const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rowCount > 0 ? true : false : null
+      callback(dataResponseObject.error, doesUserExist)
+    } */
+  const {
+    resources: items
+  } = await container.items
+    .query(querySpec)
+    .fetchAll();
+
+    console.log(items)
 }
 
 function getUserForResetPass(user_id, username, callback) {
-  const getUserQuery = user_id != null ? `SELECT * FROM "users" u WHERE u.id = '${user_id}'` :  `SELECT * FROM "users" u WHERE u.username = '${username}'` 
+  const getUserQuery = user_id != null ? `SELECT * FROM "users" u WHERE u.id = '${user_id}'` : `SELECT * FROM "users" u WHERE u.username = '${username}'`
   const sqlCallback = (dataResponseObject) => {
     const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows : null
     callback(dataResponseObject.error, userExist)
