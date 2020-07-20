@@ -80,7 +80,14 @@ function updatePassword(req, res) {
     if (error) {
       sendResponse(res, message, error)
     }
-    var payload = jwt.decode(req.query.token, secret);
+    try {
+      var payload = jwt.decode(req.query.token, secret);
+    }catch (error) {
+      const message =  'You already use this token, please use another one'
+      sendResponse(res, message, error.stack)
+      return
+    }
+
     if (payload.email != result.username) {
       message = `User is not valid`;
       error = true;

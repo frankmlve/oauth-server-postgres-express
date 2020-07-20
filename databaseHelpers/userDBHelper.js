@@ -137,7 +137,9 @@ async function updateUserPassword(userName, password, sqlCallback) {
     user.resources[0].last_update = current_date;
     user.resources[0].expiration_date = expiration_date;
     user.resources[0].password = password;
-    const { id } = user.resources[0];
+    const {
+      id
+    } = user.resources[0];
     const {
       resource: updatedItem
     } = await azureConnection.container
@@ -157,8 +159,7 @@ async function updateUserOldPassword(username, old_password, sqlCallback) {
     let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
     user.resources[0].old_password.push(old_password);
     const {
-      id,
-      category
+      id
     } = user.resources[0];
     const {
       resource: updatedItem
