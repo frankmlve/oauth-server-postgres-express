@@ -18,11 +18,28 @@ module.exports = injectedazureConnection => {
  * @param userID
  * @param callback - takes either an error or null if we successfully saved the accessToken
  */
-function saveAccessToken(accessToken, userID, callback) {
-  const getUserQuery = `INSERT INTO access_tokens (access_token, user_id) VALUES ('${accessToken}', ${userID}) ON CONFLICT (user_id) DO UPDATE SET access_token = '${accessToken}';`
-  azureConnection.query(getUserQuery, (dataResponseObject) => {
-    callback(dataResponseObject.error)
-  })
+async function saveAccessToken(accessToken, userID, callback) {
+  if (userID === 0 ){
+    callback('')
+  }
+  const getUserQuery = `select * from c c where c.id= '${userID}'`
+  try {
+    let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
+
+    const { id, category } = user.resources[0];
+
+    user.resources[0].access_token = accessToken;
+    const { resource: updatedItem } = await azureConnection.container
+      .item(id)
+      .replace(user.resources[0]);
+
+      callback(undefined)
+  } catch (error) {
+    console.log(error)
+    callback(error)
+  }
+
+
 }
 
 /**

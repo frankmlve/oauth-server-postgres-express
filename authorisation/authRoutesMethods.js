@@ -58,13 +58,12 @@ function resetPassword(req, res) {
       var payload = {
         email: req.body.username
       }
-      var secret = result[0].password + '-' + result[0].created_date.getTime()
+      var secret = result.password + '-' + new Date(result.create_date).getTime()
       var token = jwt.encode(payload, secret)
-      console.log(token + '- id= ' + result[0].id)
-      sendEmailWithNewToken(req.body.username, result[0].id, req.body.app_url, token, res);
+      sendEmailWithNewToken(req.body.username, result.id, req.body.app_url, token, res);
     } else {
       message = 'User not registered';
-      error = 'Please insert a valid user';
+      error = error;
       sendResponse(res, message, error)
       return
     }
@@ -74,31 +73,34 @@ var newPass;
 
 function updatePassword(req, res) {
   newPass = crypto.createHash("sha256").update(req.body.password).digest("hex");
-
   userDBHelper.getUserForResetPass(req.query.id, null, (error, result) => {
     let message = '';
     let pass = [];
-    var secret = result[0].password + '-' + result[0].created_date.getTime()
-    var payload = jwt.decode(req.body.token, secret);
-    if (payload.email != result[0].username) {
+    var secret = result.password + '-' + (new Date(result.create_date).getTime()).toString();
+    if (error) {
+      sendResponse(res, message, error)
+    }
+    var payload = jwt.decode(req.query.token, secret);
+    if (payload.email != result.username) {
       message = `User is not valid`;
       error = true;
       sendResponse(res, message, error);
       return
     }
+
     //Getting all old's passwords used for the user
-    for (let element of result) {
-      pass.push(element.password);
-      if (element.old_password) pass.push(element.old_password);
-    }
+
+    pass.push(result.password);
+    if (result.old_password) pass.push(result.old_password);
+
     var flag = pass.some(val => newPass.indexOf(val) !== -1);
     if (flag) {
       message = `Can't use this password, please choose one you have not used before`
       sendResponse(res, message, error);
       return
     } else {
-      userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
-        userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
+      userDBHelper.updateUserOldPassword(result.username, result.password, callback => {
+        userDBHelper.updateUserPassword(result.username, newPass, callback => {
           message = callback.error != undefined ? callback.error : 'Password was successfully updated';
           sendResponse(res, message, callback.error)
         });
@@ -118,17 +120,20 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT),
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
-    }
+    },
+    debug: true,
+    logger: true
   });
 
   var mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: '<No-Reply>' + process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
-    html: '<p>Please go to this link to <a href="' + app_url + '/' + token + '?id=' + user_id + '"> reset your password</a></p>'
+    html: '<p>Please go to this link to <a href="' + app_url + '?token=' + token + '&id=' + user_id + '"> reset your password</a></p>'
   };
   console.log(mailOptions.html)
   transporter.sendMail(mailOptions, function (error, info) {
