@@ -98,8 +98,14 @@ function updatePassword(req, res) {
     //Getting all old's passwords used for the user
 
     pass.push(result.password);
-    if (result.old_password) pass.push(result.old_password);
+    if (result.old_password) {
+      let count = 0;
+     for (let p of result.old_password){
+      pass.push(p['pass'+count]);
+      count++
+     }
 
+    }
     var flag = pass.some(val => newPass.indexOf(val) !== -1);
     if (flag) {
       message = `Can't use this password, please choose one you have not used before`

@@ -157,7 +157,9 @@ async function updateUserOldPassword(username, old_password, sqlCallback) {
   let getUserQuery = `select * from c c where c.username= '${username}'`
   try {
     let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
-    user.resources[0].old_password.push(old_password);
+    let pass_length = Object.keys(user.resources[0].old_password).length
+    let newKey = 'pass' + pass_length
+    user.resources[0].old_password.push({[newKey] : old_password })
     const {
       id
     } = user.resources[0];

@@ -38,8 +38,6 @@ async function saveAccessToken(accessToken, userID, callback) {
     console.log(error)
     callback(error)
   }
-
-
 }
 
 /**
