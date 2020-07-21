@@ -50,14 +50,14 @@ function registerUser(req, res) {
 }
 
 function login(req, res) {
-  userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (error, result) => {
+/*   userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (error, result) => {
     if (result.last_update === null) {
       sendResponse(res, 'Password most be update', error)
       return
     }
 
-  })
-
+  }) */
+  res.send('You have gained access to the area')
 }
 
 //Method reset user password
@@ -91,7 +91,7 @@ function updatePassword(req, res) {
       sendResponse(res, message, error)
     }
     try {
-      var payload = jwt.decode(req.query.token, secret);
+      var payload = jwt.decode(req.body.token, secret);
     } catch (error) {
       const message = 'You already use this token, please use another one'
       sendResponse(res, message, error.stack)
