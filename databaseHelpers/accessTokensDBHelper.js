@@ -47,18 +47,18 @@ async function saveAccessToken(accessToken, userID, callback) {
  * @param bearerToken
  * @param callback - takes the user id we if we got the userID or null to represent an error
  */
-function getUserIDFromBearerToken(bearerToken, callback) {
+async function getUserIDFromBearerToken(bearerToken, callback) {
 
   //create query to get the userID from the row which has the bearerToken
-  const getUserIDQuery = `SELECT * FROM "access_tokens" WHERE access_token = '${bearerToken}';`
+  const getUserIDQuery = `SELECT * FROM c c WHERE c.access_token = "${bearerToken}"`
   console.log(getUserIDQuery)
   //execute the query to get the userID
-  azureConnection.query(getUserIDQuery, (dataResponseObject) => {
+  try {
+    let token = await azureConnection.container.items.query(getUserIDQuery).fetchAll();
+    callback(token)
+  }catch (error) {
+    console.log(error)
+    callback(error)
+  }
 
-    //get the userID from the results if its available else assign null
-    const userID = dataResponseObject.results != undefined && dataResponseObject.results.rowCount == 1 ?
-      dataResponseObject.results.rows[0].user_id : null
-
-    callback(userID)
-  })
 }
