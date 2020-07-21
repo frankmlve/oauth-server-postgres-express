@@ -1,7 +1,7 @@
-module.exports =  (router, expressApp, restrictedAreaRoutesMethods) => {
+module.exports = (router, oauth, restrictedAreaRoutesMethods) => {
 
     //route for entering into the restricted area.
-    router.get('/enter',  expressApp.oauth.authorise(), restrictedAreaRoutesMethods.accessRestrictedArea)
+    router.get('/enter', oauth.oauth.authorise(), restrictedAreaRoutesMethods.accessRestrictedArea)
 
     return router
 }

@@ -2,6 +2,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.SERVER_PORT;
+const app = require('./oauthConfig')
 const azureConnection = require('./databaseHelpers/azureWrapper')
 const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(azureConnection)
 const userDBHelper = require('./databaseHelpers/userDBHelper')(azureConnection)
@@ -9,19 +10,17 @@ const oAuthModel = require('./authorisation/accessTokenModel')(userDBHelper, acc
 
 const express = require('express')
 const expressApp = express()
-
-
-
+/* 
 const oAuth2Server = require('node-oauth2-server')
 expressApp.oauth = oAuth2Server({
   model: oAuthModel,
   grants: ['password'],
   debug: true
-})
+}) */
 const restrictedAreaRoutesMethods = require('./restrictedArea/restrictedAreaRoutesMethods.js')
-const restrictedAreaRoutes = require('./restrictedArea/restrictedAreaRoutes.js')(express.Router(), expressApp, restrictedAreaRoutesMethods)
+const restrictedAreaRoutes = require('./restrictedArea/restrictedAreaRoutes.js')(express.Router(), app, restrictedAreaRoutesMethods)
 const authRoutesMethods = require('./authorisation/authRoutesMethods')(userDBHelper)
-const authRoutes = require('./authorisation/authRoutes')(express.Router(), expressApp, authRoutesMethods)
+const authRoutes = require('./authorisation/authRoutes')(express.Router(), app, authRoutesMethods)
 const bodyParser = require('body-parser')
 
 //enable CORS
@@ -35,7 +34,7 @@ expressApp.use(function (req, res, next) {
 expressApp.use(bodyParser.urlencoded({ extended: true }))
 
 //set the oAuth errorHandler
-expressApp.use(expressApp.oauth.errorHandler())
+expressApp.use(app.oauth.errorHandler())
 
 //set the authRoutes for registration and & login requests
 expressApp.use('/auth', authRoutes)

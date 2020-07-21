@@ -1,4 +1,5 @@
 let userDBHelper
+const oauth = require('../oauthConfig')
 const userExist_string = "User already exists";
 var crypto = require("crypto");
 
@@ -48,7 +49,16 @@ function registerUser(req, res) {
   })
 }
 
-function login(req, res) {}
+function login(req, res) {
+  userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (error, result) => {
+    if (result.last_update === null) {
+      sendResponse(res, 'Password most be update', error)
+      return
+    }
+
+  })
+
+}
 
 //Method reset user password
 function resetPassword(req, res) {
@@ -82,8 +92,8 @@ function updatePassword(req, res) {
     }
     try {
       var payload = jwt.decode(req.query.token, secret);
-    }catch (error) {
-      const message =  'You already use this token, please use another one'
+    } catch (error) {
+      const message = 'You already use this token, please use another one'
       sendResponse(res, message, error.stack)
       return
     }
@@ -100,10 +110,10 @@ function updatePassword(req, res) {
     pass.push(result.password);
     if (result.old_password) {
       let count = 0;
-     for (let p of result.old_password){
-      pass.push(p['pass'+count]);
-      count++
-     }
+      for (let p of result.old_password) {
+        pass.push(p['pass' + count]);
+        count++
+      }
 
     }
     var flag = pass.some(val => newPass.indexOf(val) !== -1);
@@ -140,7 +150,7 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   });
 
   var mailOptions = {
-    from:  process.env.EMAIL_USER,
+    from: process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
     html: '<p>Please go to this link to <a href="' + app_url + '?token=' + token + '&id=' + user_id + '"> reset your password</a></p>'
