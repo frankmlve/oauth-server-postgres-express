@@ -82,19 +82,11 @@ function updatePassword(req, res) {
       var secret = result[0].password + '-' + result[0].created_date.getTime()
       try {
         var payload = jwt.decode(req.body.token, secret);
-        if (payload.email != result[0].username) {
-          message = `User is not valid`;
-          error = true;
-          sendResponse(res, message, error);
-          return
-        }
-      }catch (error) {
+      } catch (error) {
         message = error.message
         sendResponse(res, message, error)
         return
       }
-     
-
       //Getting all old's passwords used for the user
       for (let element of result) {
         pass.push(element.password);
@@ -113,7 +105,7 @@ function updatePassword(req, res) {
           });
         });
       }
-    }else {
+    } else {
       message = `Something went worng`;
       error = true;
       sendResponse(res, message, error);
