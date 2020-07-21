@@ -86,7 +86,7 @@ function doesUserExist(username, callback) {
 function getUserForResetPass(user_id, username, callback) {
   const getUserQuery = user_id != null ? `SELECT * FROM "users" u WHERE u.id = '${user_id}'` :  `SELECT * FROM "users" u WHERE u.username = '${username}'` 
   const sqlCallback = (dataResponseObject) => {
-    const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows : null
+    const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows.length > 0 ? dataResponseObject.results.rows : null : null
     callback(dataResponseObject.error, userExist)
   }
   mySqlConnection.query(getUserQuery, sqlCallback)
