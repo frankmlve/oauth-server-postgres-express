@@ -79,7 +79,7 @@ function updatePassword(req, res) {
     let message = '';
     let pass = [];
     var secret = result[0].password + '-' + result[0].created_date.getTime()
-    var payload = jwt.decode(req.body.token, secret);
+    var payload = jwt.decode(req.query.token, secret);
     if (payload.email != result[0].username) {
       message = `User is not valid`;
       error = true;
