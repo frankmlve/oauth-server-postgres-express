@@ -26,7 +26,7 @@ async function saveAccessToken(accessToken, userID, callback) {
   try {
     let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
 
-    const { id, category } = user.resources[0];
+    const { id, category } = user.resources.length > 0 ? user.resources[0] : null
 
     user.resources[0].access_token = accessToken;
     const { resource: updatedItem } = await azureConnection.container
