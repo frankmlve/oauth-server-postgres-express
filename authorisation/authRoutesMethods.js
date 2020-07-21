@@ -78,31 +78,38 @@ function updatePassword(req, res) {
   userDBHelper.getUserForResetPass(req.query.id, null, (error, result) => {
     let message = '';
     let pass = [];
-    var secret = result[0].password + '-' + result[0].created_date.getTime()
-    var payload = jwt.decode(req.body.token, secret);
-    if (payload.email != result[0].username) {
-      message = `User is not valid`;
+    if (result) {
+      var secret = result[0].password + '-' + result[0].created_date.getTime()
+      var payload = jwt.decode(req.body.token, secret);
+      if (payload.email != result[0].username) {
+        message = `User is not valid`;
+        error = true;
+        sendResponse(res, message, error);
+        return
+      }
+      //Getting all old's passwords used for the user
+      for (let element of result) {
+        pass.push(element.password);
+        if (element.old_password) pass.push(element.old_password);
+      }
+      var flag = pass.some(val => newPass.indexOf(val) !== -1);
+      if (flag) {
+        message = `Can't use this password, please choose one you have not used before`
+        sendResponse(res, message, error);
+        return
+      } else {
+        userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
+          userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
+            message = callback.error != undefined ? callback.error : 'Password was successfully updated';
+            sendResponse(res, message, callback.error)
+          });
+        });
+      }
+    }else {
+      message = `Something went worng`;
       error = true;
       sendResponse(res, message, error);
       return
-    }
-    //Getting all old's passwords used for the user
-    for (let element of result) {
-      pass.push(element.password);
-      if (element.old_password) pass.push(element.old_password);
-    }
-    var flag = pass.some(val => newPass.indexOf(val) !== -1);
-    if (flag) {
-      message = `Can't use this password, please choose one you have not used before`
-      sendResponse(res, message, error);
-      return
-    } else {
-      userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
-        userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
-          message = callback.error != undefined ? callback.error : 'Password was successfully updated';
-          sendResponse(res, message, callback.error)
-        });
-      });
     }
   })
 }
