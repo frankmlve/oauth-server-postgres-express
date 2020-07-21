@@ -127,17 +127,14 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   var transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT),
-    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD
-    },
-    debug: true,
-    logger: true
+    }
   });
 
   var mailOptions = {
-    from: '<No-Reply>' + process.env.EMAIL_USER,
+    from:  process.env.EMAIL_USER,
     to: username,
     subject: 'Reset Password',
     html: '<p>Please go to this link to <a href="' + app_url + '?token=' + token + '&id=' + user_id + '"> reset your password</a></p>'
