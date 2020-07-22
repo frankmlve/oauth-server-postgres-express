@@ -78,7 +78,7 @@ async function getUserFromCrentials(username, password, callback) {
   try {
     let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
     console.log(user.resources[0])
-    callback(false, user.resources !== undefined && user.resources.length === 1 ? user.resources[0] : undefined)
+    callback(user.resources[0] == undefined ? 'Username or password not match with our database' : false, user.resources !== undefined && user.resources.length === 1 ? user.resources[0] : undefined)
 
   } catch (error) {
     console.log(error)

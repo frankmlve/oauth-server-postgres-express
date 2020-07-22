@@ -49,15 +49,22 @@ function registerUser(req, res) {
   })
 }
 
-function login(req, res) {
-/*   userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (error, result) => {
-    if (result.last_update === null) {
+function login(req, res, next) {
+userDBHelper.getUserFromCrentials(req.body.username, req.body.password, (error, result) => {
+  let current_date = new Date().toISOString();
+  if (result){
+    if (result.last_update === null ||   current_date < result.expiration_date) {
       sendResponse(res, 'Password most be update', error)
       return
     }
-
-  }) */
-  res.send('You have gained access to the area')
+    next()
+  }else {
+    sendResponse(res, 'User credentials are invalid', error);
+    return
+  }
+    
+  }) 
+  //res.send('You have gained access to the area')
 }
 
 //Method reset user password
