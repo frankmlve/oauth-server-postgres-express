@@ -48,7 +48,6 @@ async function saveAccessToken(accessToken, userID, callback) {
  * @param callback - takes the user id we if we got the userID or null to represent an error
  */
 async function getUserIDFromBearerToken(bearerToken, callback) {
-
   //create query to get the userID from the row which has the bearerToken
   const getUserIDQuery = `SELECT * FROM c c WHERE c.access_token = "${bearerToken}"`
   console.log(getUserIDQuery)

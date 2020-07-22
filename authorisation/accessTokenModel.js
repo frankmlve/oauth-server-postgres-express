@@ -89,15 +89,22 @@ function getAccessToken(bearerToken, callback) {
   accessTokensDBHelper.getUserIDFromBearerToken(bearerToken, (userID) => {
     let time = new Date().setHours(new Date().getHours() +1)
     //create the token using the retrieved userID
-    const accessToken = {
-      user: {
-        id: userID,
-      },
-      expires: new Date(time)
+    try {
+      const accessToken = {
+        user: {
+          id: userID.resources[0].id,
+        },
+        expires: new Date(time)
+      }
+  
+      //set the error to true if userID is null, and pass in the token if there is a userID else pass null
+      callback(userID.resources[0].id == null ? true : false, userID.resources[0].id == null ? null : accessToken)
+    }catch (error) {
+      console.log(error);
+      error.stack = 'This token is invalid'
+      callback(error, null)
     }
 
-    //set the error to true if userID is null, and pass in the token if there is a userID else pass null
-    callback(userID == null ? true : false, userID == null ? null : accessToken)
   })
 }
 //sends a response created out of the specified parameters to the client.
