@@ -4,23 +4,15 @@ dotenv.config();
 const port = process.env.SERVER_PORT;
 const app = require('./oauthConfig')
 const azureConnection = require('./databaseHelpers/azureWrapper')
-const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(azureConnection)
 const userDBHelper = require('./databaseHelpers/userDBHelper')(azureConnection)
-const oAuthModel = require('./authorisation/accessTokenModel')(userDBHelper, accessTokenDBHelper)
 
 const express = require('express')
 const expressApp = express()
-/* 
-const oAuth2Server = require('node-oauth2-server')
-expressApp.oauth = oAuth2Server({
-  model: oAuthModel,
-  grants: ['password'],
-  debug: true
-}) */
+
 const restrictedAreaRoutesMethods = require('./restrictedArea/restrictedAreaRoutesMethods.js')
 const restrictedAreaRoutes = require('./restrictedArea/restrictedAreaRoutes.js')(express.Router(), app, restrictedAreaRoutesMethods)
-const authRoutesMethods = require('./authorisation/authRoutesMethods')(userDBHelper)
-const authRoutes = require('./authorisation/authRoutes')(express.Router(), app, authRoutesMethods)
+const authRoutesMethods = require('./authorization/authRoutesMethods')(userDBHelper)
+const authRoutes = require('./authorization/authRoutes')(express.Router(), app, authRoutesMethods)
 const bodyParser = require('body-parser')
 
 //enable CORS

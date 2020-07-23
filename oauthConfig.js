@@ -3,7 +3,7 @@ const expressApp = express()
 const azureConnection = require('./databaseHelpers/azureWrapper')
 const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(azureConnection)
 const userDBHelper = require('./databaseHelpers/userDBHelper')(azureConnection)
-const oAuthModel = require('./authorisation/accessTokenModel')(userDBHelper, accessTokenDBHelper)
+const oAuthModel = require('./authorization/accessTokenModel')(userDBHelper, accessTokenDBHelper)
 
 const oAuth2Server = require('node-oauth2-server')
 const oauth = expressApp.oauth = oAuth2Server({

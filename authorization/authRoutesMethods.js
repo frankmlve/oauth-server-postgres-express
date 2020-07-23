@@ -18,35 +18,44 @@ module.exports = (injectedUserDBHelper) => {
     login: login,
     resetPassword: resetPassword,
     sendEmailWithNewToken: sendEmailWithNewToken,
-    updatePassword: updatePassword
+    updatePassword: updatePassword,
+    deleteUser: deleteUser
   }
 }
 
 function registerUser(req, res) {
-  userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
+  userDBHelper.validateIfAdminUser(req.body.admin_user, (error, result) => {
     let message;
-    let error;
-    //check if the user exists
-    if (sqlError !== undefined || doesUserExist) {
-      message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
-      error = sqlError !== undefined ? sqlError : userExist_string;
-      sendResponse(res, message, sqlError)
-      return
-    }
-    if (req.body.password == null || req.body.password == '') {
-      message = 'Please insert a password';
-      sendResponse(res, message, sqlError)
-      return
-    } else {
-      //register the user in the db
-      userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
-        //create message for the api response
-        message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
-        sendResponse(res, message, dataResponseObject.error)
-      })
-    }
+    console.log(result)
+    if (result && result.role.toLowerCase() === 'admin') {
+      userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
 
-  })
+        //check if the user exists
+        if (sqlError !== undefined || doesUserExist) {
+          message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
+          error = sqlError !== undefined ? sqlError : userExist_string;
+          sendResponse(res, message, sqlError)
+          return
+        }
+        if (req.body.password == null || req.body.password == '') {
+          message = 'Please insert a password';
+          sendResponse(res, message, sqlError)
+          return
+        } else {
+          //register the user in the db
+          userDBHelper.registerUserInDB(req.body.username, req.body.password, req.body.role, dataResponseObject => {
+            //create message for the api response
+            message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
+            sendResponse(res, message, dataResponseObject.error)
+          })
+        }
+      })
+    }else {
+      message = `You don't have permissions to regiter new users, please contact to Digital IT Manager`
+      sendResponse(res, message, error ? error : true)
+      return
+    }
+  }) 
 }
 
 function login(req, res, next) {
@@ -175,4 +184,34 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
       return
     }
   });
+}
+
+function deleteUser(req,res){
+  userDBHelper.validateIfAdminUser(req.body.admin_user, (error, result) => {
+    let message;
+    if (result && result.role.toLowerCase() === 'admin') {
+      userDBHelper.doesUserExist(req.body.username, (err, exist) => {
+        if (exist) {
+          userDBHelper.deleteUser(req.body.username, (sqlError, results) => {
+            if (!sqlError) {
+              message = `User was successfully deleted`
+              sendResponse(res, message, sqlError)
+            }else {
+              message = `Was an error during deletion of user`
+              sendResponse(res, message, sqlError)
+              return
+            }
+          })
+        }else {
+          message = `Please insert a valid user for delete`
+          sendResponse(res, message, true)
+          return
+        }
+      })
+    }else {
+      message = `You don't have permissions to delete users, please contact to Digital IT Manager`
+      sendResponse(res, message, true)
+      return
+    }
+  })
 }

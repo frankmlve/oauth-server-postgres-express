@@ -14,7 +14,9 @@ module.exports = injectedAzureConnection => {
     doesUserExist: doesUserExist,
     updateUserPassword: updateUserPassword,
     getUserForResetPass: getUserForResetPass,
-    updateUserOldPassword: updateUserOldPassword
+    updateUserOldPassword: updateUserOldPassword,
+    validateIfAdminUser: validateIfAdminUser,
+    deleteUser: deleteUser
   }
 }
 
@@ -30,7 +32,7 @@ module.exports = injectedAzureConnection => {
  */
 
 
-async function registerUserInDB(username, password, registrationCallback) {
+async function registerUserInDB(username, password, role, registrationCallback) {
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");
   let user_id = await azureConnection.container.items.query(`select max(c.id) from c c`).fetchAll();
   let max_id = user_id.resources[0].$1 == undefined ? 0 : user_id.resources[0].$1;
@@ -41,6 +43,7 @@ async function registerUserInDB(username, password, registrationCallback) {
     password: shaPass,
     create_date: current_date,
     last_update: null,
+    role: role
   };
   try {
     const {
@@ -159,7 +162,9 @@ async function updateUserOldPassword(username, old_password, sqlCallback) {
     let user = await azureConnection.container.items.query(getUserQuery).fetchAll();
     let pass_length = Object.keys(user.resources[0].old_password).length
     let newKey = 'pass' + pass_length
-    user.resources[0].old_password.push({[newKey] : old_password })
+    user.resources[0].old_password.push({
+      [newKey]: old_password
+    })
     const {
       id
     } = user.resources[0];
@@ -174,4 +179,27 @@ async function updateUserOldPassword(username, old_password, sqlCallback) {
     sqlCallback(error)
   }
 
+}
+
+async function validateIfAdminUser(username, callback) {
+  let validateIfAdminUserQuery = `select * from c c where c.username= '${username}'`
+  try {
+    let user = await azureConnection.container.items.query(validateIfAdminUserQuery).fetchAll();
+    callback(false, user.resources[0])
+  } catch (error) {
+    console.log(error)
+    callback(error)
+  }
+}
+
+async function deleteUser(username, callback) {
+  try {
+    const {
+      resource: result
+    } = await azureConnection.container.item(`${username}`)
+    callback(false, result)
+  }catch(error) {
+    console.log(error)
+    callback(error, null)
+  }
 }
