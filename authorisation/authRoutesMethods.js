@@ -17,35 +17,45 @@ module.exports = (injectedUserDBHelper) => {
     login: login,
     resetPassword: resetPassword,
     sendEmailWithNewToken: sendEmailWithNewToken,
-    updatePassword: updatePassword
+    updatePassword: updatePassword,
+    deleteUser: deleteUser
   }
 }
 
 function registerUser(req, res) {
-  userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
+  userDBHelper.validateIfAdminUser(req.body.admin_user, (callback) => {
     let message;
     let error;
-    //check if the user exists
-    if (sqlError !== undefined || doesUserExist) {
-      message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
-      error = sqlError !== undefined ? sqlError : userExist_string;
-      sendResponse(res, message, sqlError)
-      return
-    }
-    if (req.body.password == null || req.body.password == '') {
-      message = 'Please insert a password';
-      sendResponse(res, message, sqlError)
-      return
-    } else {
-      //register the user in the db
-      userDBHelper.registerUserInDB(req.body.username, req.body.password, dataResponseObject => {
-        //create message for the api response
-        message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
-        sendResponse(res, message, dataResponseObject.error)
+    if (callback.results.rows.length > 0 && callback.results.rows[0].role.toLowerCase() === 'admin') {
+      userDBHelper.doesUserExist(req.body.username, (sqlError, doesUserExist) => {
+        //check if the user exists
+        if (sqlError !== undefined || doesUserExist) {
+          message = sqlError !== undefined ? "Operation unsuccessful" : userExist_string
+          error = sqlError !== undefined ? sqlError : userExist_string;
+          sendResponse(res, message, sqlError)
+          return
+        }
+        if (req.body.password == null || req.body.password == '') {
+          message = 'Please insert a password';
+          sendResponse(res, message, sqlError)
+          return
+        } else {
+          //register the user in the db
+          userDBHelper.registerUserInDB(req.body.username, req.body.password, req.body.role, dataResponseObject => {
+            //create message for the api response
+            message = dataResponseObject.error === undefined ? "Registration was successful" : "Failed to register user"
+            sendResponse(res, message, dataResponseObject.error)
+          })
+        }
       })
+    }else {
+      message = `You don't have permissions to regiter new users, please contact to Digital IT Manager`
+      sendResponse(res, message, callback.error ? callback.error : true)
+      return
     }
 
   })
+
 }
 
 function login(req, res) {}
@@ -113,6 +123,53 @@ function updatePassword(req, res) {
     }
   })
 }
+
+function deleteUser(req, res) {
+  let message = '';
+  userDBHelper.validateIfAdminUser(req.body.admin_user, callback => {
+    if (callback.results && callback.results.rows[0].role.toLowerCase() === 'admin') {
+      userDBHelper.doesUserExist(req.body.username, (error, result) => {
+        if (result) {
+          userDBHelper.deleteUserAccessToken(req.body.username, callback => {
+            if (callback.error == undefined) {
+              userDBHelper.deleteUserOldPasswords(req.body.username, callback => {
+                if (callback.error == undefined) {
+                  userDBHelper.deleteUserFromDB(req.body.username, callback => {
+                    if (callback.error == undefined) {
+                      message = `User was successfully deleted`
+                      sendResponse(res, message, error)
+                    } else {
+                      message = `Was an error during deletion of user`
+                      sendResponse(res, message, callback.error)
+                      return
+                    }
+                  });
+                } else {
+                  message = ''
+                  sendResponse(res, message, callback.error)
+                  return
+                }
+              })
+            } else {
+              message = 'Was an error during delition of access token'
+              sendResponse(res, message, callback.error)
+              return
+            }
+          })
+        } else {
+          message = `This user not exist`;
+          sendResponse(res, message, error);
+          return;
+        }
+      })
+    }else {
+      message = `You don't have permissions to delete users, please contact to Digital IT Manager`
+      sendResponse(res, message, callback.error)
+      return
+    }
+  })
+
+}
 //sends a response created out of the specified parameters to the client.
 function sendResponse(res, message, error) {
   res.status(error !== undefined ? 400 : 200).json({
@@ -132,7 +189,7 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   });
 
   var mailOptions = {
-    from: `"Portal de Accionistas GIHSA" <${process.env.EMAIL_USER}>` ,
+    from: `"Portal de Accionistas GIHSA" <${process.env.EMAIL_USER}>`,
     to: username,
     subject: 'Reinicio de contraseña Portal accionista GIHSA',
     html: '<p>Por favor dirijase a este link para <a href="' + app_url + '?token=' + token + '&id=' + user_id + '">reiniciar su contraseña</a></p>'

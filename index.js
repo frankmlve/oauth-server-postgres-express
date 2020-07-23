@@ -2,9 +2,9 @@
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.SERVER_PORT;
-const mySqlConnection = require('./databaseHelpers/mySqlWrapper')
-const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(mySqlConnection)
-const userDBHelper = require('./databaseHelpers/userDBHelper')(mySqlConnection)
+const postgresqlConnection = require('./databaseHelpers/mySqlWrapper')
+const accessTokenDBHelper = require('./databaseHelpers/accessTokensDBHelper')(postgresqlConnection)
+const userDBHelper = require('./databaseHelpers/userDBHelper')(postgresqlConnection)
 const oAuthModel = require('./authorisation/accessTokenModel')(userDBHelper, accessTokenDBHelper)
 
 const express = require('express')

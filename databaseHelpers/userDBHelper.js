@@ -1,11 +1,11 @@
-let mySqlConnection;
+let postgresqlConnection;
 var crypto = require("crypto");
 let current_date = new Date().toISOString();
 
 
-module.exports = injectedMySqlConnection => {
+module.exports = injectedpostgresqlConnection => {
 
-  mySqlConnection = injectedMySqlConnection
+  postgresqlConnection = injectedpostgresqlConnection
 
   return {
 
@@ -14,7 +14,11 @@ module.exports = injectedMySqlConnection => {
     doesUserExist: doesUserExist,
     updateUserPassword: updateUserPassword,
     getUserForResetPass: getUserForResetPass,
-    updateUserOldPassword: updateUserOldPassword 
+    updateUserOldPassword: updateUserOldPassword,
+    deleteUserFromDB: deleteUserFromDB,
+    deleteUserOldPasswords: deleteUserOldPasswords,
+    deleteUserAccessToken: deleteUserAccessToken,
+    validateIfAdminUser: validateIfAdminUser
   }
 }
 
@@ -30,11 +34,11 @@ module.exports = injectedMySqlConnection => {
  */
 
 
-function registerUserInDB(username, password, registrationCallback) {
+function registerUserInDB(username, password, role, registrationCallback) {
   var shaPass = crypto.createHash("sha256").update(password).digest("hex");
-  const registerUserQuery = `INSERT INTO "users" (username, password, created_date) VALUES ('${username}', '${shaPass}', '${current_date}')`
+  const registerUserQuery = `INSERT INTO "users" (username, password, created_date, role) VALUES ('${username}', '${shaPass}', '${current_date}', '${role}')`
   console.log('Query para insert= ' + registerUserQuery)
-  mySqlConnection.query(registerUserQuery, registrationCallback)
+  postgresqlConnection.query(registerUserQuery, registrationCallback)
 }
 
 /**
@@ -54,7 +58,7 @@ function getUserFromCrentials(username, password, callback) {
   console.log(getUserQuery)
 
   //execute the query to get the user
-  mySqlConnection.query(getUserQuery, (dataResponseObject) => {
+  postgresqlConnection.query(getUserQuery, (dataResponseObject) => {
     //pass in the error which may be undefined and pass the results object which we get the user from if it is not null
     callback(false, dataResponseObject.results !== undefined && dataResponseObject.results.rows.length === 1 ? dataResponseObject.results.rows[0] : undefined)
   })
@@ -80,7 +84,7 @@ function doesUserExist(username, callback) {
     const doesUserExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rowCount > 0 ? true : false : null
     callback(dataResponseObject.error, doesUserExist)
   }
-  mySqlConnection.query(doesUserExistQuery, sqlCallback)
+  postgresqlConnection.query(doesUserExistQuery, sqlCallback)
 }
 
 function getUserForResetPass(user_id, username, callback) {
@@ -89,19 +93,38 @@ function getUserForResetPass(user_id, username, callback) {
     const userExist = dataResponseObject.results !== undefined ? dataResponseObject.results.rows.length > 0 ? dataResponseObject.results.rows : null : null
     callback(dataResponseObject.error, userExist)
   }
-  mySqlConnection.query(getUserQuery, sqlCallback)
+  postgresqlConnection.query(getUserQuery, sqlCallback)
 }
 //Updating user password last_update
 function updateUserPassword(userName, password, sqlCallback) {
   let date = new Date().setMonth(new Date().getMonth() + parseInt(process.env.PASSWORD_EXPIRE_DATE))
   let expiration_date = new Date(date).toISOString()
   const updatePasswordQuery = `UPDATE "users" set password = '${password}', last_update = '${current_date}', expiration_date= '${expiration_date}' WHERE username = '${userName}';`
-  mySqlConnection.query(updatePasswordQuery, sqlCallback)
+  postgresqlConnection.query(updatePasswordQuery, sqlCallback)
 
 }
 
 function updateUserOldPassword(username, old_password, sqlCallback) {
-  //var shaPass = crypto.createHash("sha256").update(old_password).digest("hex");
   const updateOldPasswordQuery = `INSERT INTO "old_passwords"  (username, old_password) VALUES ('${username}', '${old_password}');`;
-  mySqlConnection.query(updateOldPasswordQuery, sqlCallback);
+  postgresqlConnection.query(updateOldPasswordQuery, sqlCallback);
+}
+
+function deleteUserFromDB(username, callback){
+  const deleteUserQuery = `DELETE FROM  "users" WHERE username= '${username}'`
+  console.log(deleteUserQuery);
+  postgresqlConnection.query(deleteUserQuery, callback);
+}
+function deleteUserOldPasswords(username, callback) {
+  const deleteUserOldPasswordsQuery = `DELETE FROM "old_passwords" WHERE username= '${username}'`
+  console.log(deleteUserOldPasswordsQuery)
+  postgresqlConnection.query(deleteUserOldPasswordsQuery, callback);
+}
+function deleteUserAccessToken(username, callback) {
+  const deleteUserAccessTokenQuery = `DELETE FROM "access_tokens" WHERE user_id = (SELECT u.id FROM "users" u where username= '${username}')`
+  console.log(deleteUserAccessTokenQuery)
+  postgresqlConnection.query(deleteUserAccessTokenQuery, callback)
+}
+function validateIfAdminUser(username, callback) {
+  const validateIfAdminUserQuery = `SELECT * FROM "users" where username= '${username}'`
+  postgresqlConnection.query(validateIfAdminUserQuery, callback);
 }
