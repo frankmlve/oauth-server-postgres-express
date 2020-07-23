@@ -132,7 +132,7 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   });
 
   var mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: '<Portal de Accionistas>' +process.env.EMAIL_USER,
     to: username,
     subject: 'Reinicion de Contraseña',
     html: '<p>Por favor dirijase a este link para <a href="' + app_url + '?token=' + token + '&id=' + user_id + '">reiniciar su contraseña</a></p>'
