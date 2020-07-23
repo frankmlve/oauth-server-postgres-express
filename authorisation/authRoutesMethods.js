@@ -132,9 +132,9 @@ function sendEmailWithNewToken(username, user_id, app_url, token, res) {
   });
 
   var mailOptions = {
-    from: `"Portal de Accionistas" <${process.env.EMAIL_USER}>` ,
+    from: `"Portal de Accionistas GIHSA" <${process.env.EMAIL_USER}>` ,
     to: username,
-    subject: 'Reinicion de Contraseña',
+    subject: 'Reinicio de contraseña Portal accionista GIHSA',
     html: '<p>Por favor dirijase a este link para <a href="' + app_url + '?token=' + token + '&id=' + user_id + '">reiniciar su contraseña</a></p>'
   };
   console.log(mailOptions.html)
