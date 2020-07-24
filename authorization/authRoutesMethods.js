@@ -190,9 +190,9 @@ function deleteUser(req,res){
   userDBHelper.validateIfAdminUser(req.body.admin_user, (error, result) => {
     let message;
     if (result && result.role.toLowerCase() === 'admin') {
-      userDBHelper.doesUserExist(req.body.username, (err, exist) => {
-        if (exist) {
-          userDBHelper.deleteUser(req.body.username, (sqlError, results) => {
+      userDBHelper.getUserForDelete(req.body.username, (err, user) => {
+        if (user) {
+          userDBHelper.deleteUser(user.id, (sqlError, results) => {
             if (!sqlError) {
               message = `User was successfully deleted`
               sendResponse(res, message, sqlError)

@@ -16,7 +16,8 @@ module.exports = injectedAzureConnection => {
     getUserForResetPass: getUserForResetPass,
     updateUserOldPassword: updateUserOldPassword,
     validateIfAdminUser: validateIfAdminUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    getUserForDelete: getUserForDelete
   }
 }
 
@@ -192,11 +193,22 @@ async function validateIfAdminUser(username, callback) {
   }
 }
 
+async function getUserForDelete(username, callback) {
+  let getUserForDeleteQuery = `select * from c c where c.username= '${username}'`
+  console.log(getUserForDeleteQuery)
+  try {
+    let user = await azureConnection.container.items.query(getUserForDeleteQuery).fetchAll();
+    callback(false, user.resources[0])
+  }catch(error) {
+    console.log(error);
+    callback(error, null)
+  }
+}
 async function deleteUser(username, callback) {
   try {
     const {
       resource: result
-    } = await azureConnection.container.item(`${username}`)
+    } = await azureConnection.container.item(`${username}`).delete();
     callback(false, result)
   }catch(error) {
     console.log(error)
