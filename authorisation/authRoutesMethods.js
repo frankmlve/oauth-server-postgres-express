@@ -4,7 +4,7 @@ var crypto = require("crypto");
 
 const nodemailer = require('nodemailer');
 
-const jwt = require('jwt-simple');
+const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -48,7 +48,7 @@ function registerUser(req, res) {
           })
         }
       })
-    }else {
+    } else {
       message = `You don't have permissions to regiter new users, please contact to Digital IT Manager`
       sendResponse(res, message, callback.error ? callback.error : true)
       return
@@ -65,11 +65,13 @@ function resetPassword(req, res) {
   userDBHelper.getUserForResetPass(null, req.body.username, (error, result) => {
     let message = '';
     if (result) {
-      var payload = {
-        email: req.body.username
+      var tokenData = {
+        username: req.body.username
       }
-      var secret = result[0].password + '-' + result[0].created_date.getTime()
-      var token = jwt.encode(payload, secret)
+      var secret = result[0].password + '-' + new Date(result[0].create_date).getTime()
+      var token = jwt.sign(tokenData, secret, {
+        expiresIn: 300
+      })
       console.log(token + '- id= ' + result[0].id)
       sendEmailWithNewToken(req.body.username, result[0].id, req.body.app_url, token, res);
     } else {
@@ -89,32 +91,43 @@ function updatePassword(req, res) {
     let message = '';
     let pass = [];
     if (result) {
-      var secret = result[0].password + '-' + result[0].created_date.getTime()
-      try {
-        var payload = jwt.decode(req.body.token, secret);
-      } catch (error) {
-        message = error.message
-        sendResponse(res, message, error)
-        return
-      }
-      //Getting all old's passwords used for the user
-      for (let element of result) {
-        pass.push(element.password);
-        if (element.old_password) pass.push(element.old_password);
-      }
-      var flag = pass.some(val => newPass.indexOf(val) !== -1);
-      if (flag) {
-        message = `Can't use this password, please choose one you have not used before`
-        sendResponse(res, message, error);
-        return
-      } else {
-        userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
-          userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
-            message = callback.error != undefined ? callback.error : 'Password was successfully updated';
-            sendResponse(res, message, callback.error)
-          });
-        });
-      }
+      var secret = result[0].password + '-' + new Date(result[0].create_date).getTime()
+      jwt.verify(req.body.token, secret, function (err, user) {
+        if (err) {
+          sendResponse(res, err.message, true);
+          return
+        } else {
+          if (user.username != result[0].username) {
+            message = `User is not valid`;
+            error = true;
+            sendResponse(res, message, error);
+            return
+          }
+          //Getting all old's passwords used for the user
+  
+          pass.push(result[0].password);
+          if (result[0].old_password) {
+            let count = 0;
+            for (let p of result[0].old_password) {
+              pass.push(p['pass' + count]);
+              count++
+            }
+          }
+          var flag = pass.some(val => newPass.indexOf(val) !== -1);
+          if (flag) {
+            message = `Can't use this password, please choose one you have not used before`
+            sendResponse(res, message, error);
+            return
+          } else {
+            userDBHelper.updateUserOldPassword(result[0].username, result[0].password, callback => {
+              userDBHelper.updateUserPassword(result[0].username, newPass, callback => {
+                message = callback.error != undefined ? callback.error : 'Password was successfully updated';
+                sendResponse(res, message, callback.error)
+              });
+            });
+          }
+        }
+      })
     } else {
       message = `Something went worng`;
       error = true;
@@ -162,7 +175,7 @@ function deleteUser(req, res) {
           return;
         }
       })
-    }else {
+    } else {
       message = `You don't have permissions to delete users, please contact to Digital IT Manager`
       sendResponse(res, message, callback.error)
       return

@@ -1,7 +1,7 @@
 module.exports =  (router, expressApp, authRoutesMethods) => {
 
     //route for registering new users
-    router.post('/register', authRoutesMethods.registerUser)
+    router.post('/register',expressApp.oauth.authorise(), authRoutesMethods.registerUser)
 
     //route for allowing existing users to login
     router.post('/login', expressApp.oauth.grant(), authRoutesMethods.login)
@@ -13,7 +13,7 @@ module.exports =  (router, expressApp, authRoutesMethods) => {
     router.post('/newPassword', authRoutesMethods.updatePassword)
 
     //router for delete user
-    router.delete('/deleteUser', authRoutesMethods.deleteUser)
+    router.delete('/deleteUser',expressApp.oauth.authorise(), authRoutesMethods.deleteUser)
     
     return router
 }
